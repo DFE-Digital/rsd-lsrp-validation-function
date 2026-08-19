@@ -1,0 +1,15 @@
+{
+  "profiles": {
+    "GovUK.Dfe.Lsrp.FileValidator": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7211"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "containerRunArguments": "--init",
+      "httpPort": 34649,
+      "useSSL": false
+    }
+  }
+}
