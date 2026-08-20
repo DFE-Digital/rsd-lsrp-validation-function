@@ -1,14 +1,18 @@
 using Azure.Monitor.OpenTelemetry.Exporter;
-using Microsoft.Azure.Functions.Worker;
+using GovUK.Dfe.Lsrp.FileValidator.Models;
+using GovUK.Dfe.Lsrp.FileValidator.Services;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Azure.Functions.Worker.OpenTelemetry;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using OpenTelemetry;
 
 var builder = FunctionsApplication.CreateBuilder(args);
 
 builder.ConfigureFunctionsWebApplication();
+
+builder.Configuration.AddJsonFile("appsettings.json");
+builder.Services.Configure<ValidationOptions>(builder.Configuration.GetSection("ValidationOptions"));
 
 if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING")))
 {
@@ -16,5 +20,10 @@ if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPLICATIONINSIGHT
         .UseFunctionsWorkerDefaults()
         .UseAzureMonitorExporter();
 }
+
+builder.Services.AddScoped<ISpreadsheetValidationService, SpreadsheetValidationService>();
+builder.Services.AddScoped<IDataValidator, DataValidator>();
+builder.Services.AddScoped<IFileProvider, FileProvider>();
+builder.Services.AddScoped<ISpreadsheetDataProvider, SpreadsheetDataProvider>();
 
 builder.Build().Run();
