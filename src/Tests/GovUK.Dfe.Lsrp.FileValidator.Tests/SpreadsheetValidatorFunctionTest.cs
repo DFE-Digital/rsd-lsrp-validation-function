@@ -19,7 +19,7 @@ public class SpreadsheetValidatorFunctionTest
         SpreadsheetValidatorFunction function = new(validationService, NullLogger<SpreadsheetValidatorFunction>.Instance);
         ServiceBusReceivedMessage message = CreateMessage(new FileMessage
         {
-            ApplicationId = Guid.Parse("00000000-0000-0000-0000-000000000000"),
+            ApplicationId = Guid.Empty,
             ApplicationReference = "APP-001",
             Filename = "test.xlsx",
             UserEmail = "user@example.com"
@@ -39,7 +39,7 @@ public class SpreadsheetValidatorFunctionTest
         SpreadsheetValidatorFunction function = new(validationService, NullLogger<SpreadsheetValidatorFunction>.Instance);
         ServiceBusReceivedMessage message = CreateMessage(new FileMessage
         {
-            ApplicationId = Guid.Parse("00000000-0000-0000-0000-000000000000"),
+            ApplicationId = Guid.Empty,
             ApplicationReference = "APP-001",
             Filename = "",
             UserEmail = "user@example.com"
@@ -72,6 +72,6 @@ public class SpreadsheetValidatorFunctionTest
     private static ServiceBusReceivedMessage CreateMessageFromJson(string json)
         => ServiceBusModelFactory.ServiceBusReceivedMessage(
             body: BinaryData.FromString(json),
-            messageId: Guid.Parse("00000000-0000-0000-0000-000000000000").ToString(),
+            messageId: Guid.Empty.ToString(),
             contentType: "application/json");
 }

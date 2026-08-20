@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\GovUK.Dfe.Lsrp.FileValidator\GovUK.Dfe.Lsrp.FileValidator.csproj" />
+    <ProjectReference Include="..\..\GovUK.Dfe.Lsrp.FileValidator\GovUK.Dfe.Lsrp.FileValidator.csproj" />
   </ItemGroup>
 
   <ItemGroup>
