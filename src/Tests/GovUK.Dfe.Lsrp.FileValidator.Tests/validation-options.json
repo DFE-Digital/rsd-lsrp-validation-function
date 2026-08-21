@@ -1,0 +1,31 @@
+{
+  "SpreadsheetMaps": [
+    {
+      "Worksheet": "Quarterly Returns",
+      "DataMaps": [
+        {
+          "Name": "DataYear",
+          "Cell": "B5"
+        }
+      ]
+    },
+    {
+      "Worksheet": "Guidance"
+    },
+    {
+      "Worksheet": "Cover"
+    }
+  ],
+  "Workflows": [
+    {
+      "WorkflowName": "Quarterly Returns",
+      "Rules": [
+        {
+          "RuleName": "Rule1",
+          "Expression": "RegexMatcher.Match(DataYear, \"^20\\\\d{2}-\\\\d{2} Data$\")",
+          "ErrorMessage": "DataYear must be of format \"20xx-yy Data\""
+        }
+      ]
+    }
+  ]
+}

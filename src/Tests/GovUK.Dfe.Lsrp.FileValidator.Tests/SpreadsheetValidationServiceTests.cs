@@ -3,10 +3,12 @@ using GovUK.Dfe.Lsrp.FileValidator.Services;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using RulesEngine.Models;
+using System.Text.Json;
+using Xunit.Abstractions;
 
 namespace GovUK.Dfe.Lsrp.FileValidator.Tests;
 
-public class SpreadsheetValidationServiceTests
+public class SpreadsheetValidationServiceTests(ITestOutputHelper output)
 {
     [Fact]
     public async Task ValidateAsync_WhenSpreadsheetMapsMissing_ThrowsInvalidOperationException()
@@ -131,6 +133,29 @@ public class SpreadsheetValidationServiceTests
         Assert.False(result);
         Assert.Single(errors);
         await dataValidator.DidNotReceive().ValidateAsync(Arg.Any<object>(), Arg.Any<IEnumerable<Workflow>>(), Arg.Any<IList<string>>());
+    }
+
+    [Fact]
+    public async Task ValidateAsync_WithValidData_ReturnsTrue()
+    {
+        IFileProvider fileProvider = Substitute.For<IFileProvider>();
+        fileProvider.GetFileAsync("qr-test.xlsx").Returns(new MemoryStream(File.ReadAllBytes("qr-test.xlsx")));
+
+        ISpreadsheetDataProvider dataProvider = new SpreadsheetDataProvider();
+
+        IDataValidator dataValidator = new DataValidator();
+
+        ValidationOptions validationOptions = JsonSerializer.Deserialize<ValidationOptions>(File.ReadAllText("validation-options.json")) ?? throw new InvalidOperationException("ValidationOptions missing in validation-options.json");
+        IOptions<ValidationOptions> options = Substitute.For<IOptions<ValidationOptions>>();
+        options.Value.Returns(validationOptions);
+
+        SpreadsheetValidationService service = new(fileProvider, dataProvider, dataValidator, options);
+        List<string> errors = [];
+        bool result = await service.ValidateAsync("qr-test.xlsx", errors);
+
+        output.WriteLine($"Validation result: {result}. Errors: {string.Join(", ", errors)}");
+        Assert.True(result);
+        Assert.Empty(errors);
     }
 
     private static IOptions<ValidationOptions> CreateValidOptions()

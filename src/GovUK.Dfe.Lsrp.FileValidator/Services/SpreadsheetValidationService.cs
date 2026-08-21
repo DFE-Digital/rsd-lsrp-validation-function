@@ -14,13 +14,7 @@ public class SpreadsheetValidationService(IFileProvider fileProvider, ISpreadshe
         using Stream stream = await fileProvider.GetFileAsync(filename) ?? throw new InvalidOperationException("File stream null.");
 
         object data = await dataProvider.GetDataAsync(stream, spreadsheetMaps, errors) ?? throw new InvalidOperationException("Spreadsheet data null.");
-
-        var isValid = false;
-        if (errors.Count == 0)
-        {
-            isValid = await dataValidator.ValidateAsync(data, workflows, errors);
-        }
-
-        return isValid;
+        
+        return errors.Count == 0 && await dataValidator.ValidateAsync(data, workflows, errors);
     }
 }
