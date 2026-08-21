@@ -12,6 +12,11 @@ public class FileProvider(IConfiguration config) : IFileProvider
         string? shareName = config["WEBSITE_CONTENTSHARE"];
         string? dirName = config["WEBSITE_CONTENTDIRECTORY"];
 
+        if (string.IsNullOrWhiteSpace(connectionString) || string.IsNullOrWhiteSpace(shareName) || string.IsNullOrWhiteSpace(dirName))
+        {
+            throw new InvalidOperationException("Azure File Share configuration is missing (WEBSITE_CONTENTAZUREFILECONNECTIONSTRING/WEBSITE_CONTENTSHARE/WEBSITE_CONTENTDIRECTORY).");
+        }
+
         ShareClient share = new(connectionString, shareName);
         ShareDirectoryClient directory = share.GetDirectoryClient(dirName);
         ShareFileClient file = directory.GetFileClient(filename);
