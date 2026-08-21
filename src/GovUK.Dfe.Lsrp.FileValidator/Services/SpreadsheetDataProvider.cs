@@ -27,7 +27,7 @@ public class SpreadsheetDataProvider : ISpreadsheetDataProvider
                 continue;
             }
 
-            WorksheetPart wsPart = (WorksheetPart)wbPart!.GetPartById(wSheet.Id!);
+            WorksheetPart? wsPart = wbPart.GetPartById(wSheet.Id!) as WorksheetPart;
             if (wsPart is null)
             {
                 errors.Add($"WorksheetPart for sheet '{spreadsheetMap.Worksheet}' not found.");
