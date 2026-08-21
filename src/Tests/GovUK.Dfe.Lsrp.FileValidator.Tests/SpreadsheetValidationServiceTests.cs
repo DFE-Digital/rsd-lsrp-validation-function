@@ -139,8 +139,8 @@ public class SpreadsheetValidationServiceTests(ITestOutputHelper output)
     public async Task ValidateAsync_WithValidData_ReturnsTrue()
     {
         IFileProvider fileProvider = Substitute.For<IFileProvider>();
-        fileProvider.GetFileAsync("qr-test.xlsx").Returns(new MemoryStream(File.ReadAllBytes("qr-test.xlsx")));
-
+        string excelPath = Path.Combine(AppContext.BaseDirectory, "qr-test.xlsx");
+        fileProvider.GetFileAsync("qr-test.xlsx").Returns(_ => new MemoryStream(File.ReadAllBytes(excelPath)));
         ISpreadsheetDataProvider dataProvider = new SpreadsheetDataProvider();
 
         IDataValidator dataValidator = new DataValidator();
