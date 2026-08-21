@@ -46,7 +46,7 @@ public class SpreadsheetDataProvider : ISpreadsheetDataProvider
                 }
 
                 string? cellValue;
-                if (cell is null || cell.InnerText.Length < 0)
+                if (string.IsNullOrEmpty(cell.InnerText))
                 {
                     data.Add(dataMap.Name!, null);
                     continue;
