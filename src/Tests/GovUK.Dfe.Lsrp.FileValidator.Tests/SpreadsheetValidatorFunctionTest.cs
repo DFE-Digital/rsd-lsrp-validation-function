@@ -14,7 +14,7 @@ public class SpreadsheetValidatorFunctionTest
     public async Task Run_WhenMessageIsValid_CallsValidationAndCompletesMessage()
     {
         ISpreadsheetValidationService validationService = Substitute.For<ISpreadsheetValidationService>();
-        validationService.ValidateAsync(Arg.Any<string>(), Arg.Any<List<string>>()).Returns(true);
+        validationService.ValidateAsync(Arg.Any<string>(), Arg.Any<List<string>>()).Returns(Task.FromResult(true));
 
         SpreadsheetValidatorFunction function = new(validationService, NullLogger<SpreadsheetValidatorFunction>.Instance);
         ServiceBusReceivedMessage message = CreateMessage(new FileMessage
