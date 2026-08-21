@@ -15,7 +15,7 @@ public class SpreadsheetValidatorFunction(ISpreadsheetValidationService validati
         ServiceBusMessageActions messageActions)
     {
         logger.LogInformation("Message ID: {id}", message.MessageId);
-        logger.LogInformation("Message Body: {body}", message.Body);
+        logger.LogInformation("Message Body Length: {length}", message.Body.ToMemory().Length);
         logger.LogInformation("Message Content-Type: {contentType}", message.ContentType);
 
         FileMessage fileMessage = JsonSerializer.Deserialize<FileMessage>(message.Body) ?? throw new ArgumentException("Message body not JSON");
