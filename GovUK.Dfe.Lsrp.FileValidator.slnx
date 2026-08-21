@@ -1,4 +1,12 @@
 <Solution>
-  <Folder Name="/src/" />
-  <Project Path="src/GovUK.Dfe.Lsrp.FileValidator/GovUK.Dfe.Lsrp.FileValidator.csproj" Id="d8abbe96-f033-4cf9-b809-d828465b7414" />
+  <Folder Name="/Solution Items/">
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/GovUK.Dfe.Lsrp.FileValidator/GovUK.Dfe.Lsrp.FileValidator.csproj" Id="d8abbe96-f033-4cf9-b809-d828465b7414" />
+  </Folder>
+  <Folder Name="/src/Tests/">
+    <Project Path="src/Tests/GovUK.Dfe.Lsrp.FileValidator.Tests/GovUK.Dfe.Lsrp.FileValidator.Tests.csproj" />
+  </Folder>
 </Solution>
