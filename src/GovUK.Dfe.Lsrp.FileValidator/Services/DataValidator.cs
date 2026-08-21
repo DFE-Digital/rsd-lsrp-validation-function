@@ -35,8 +35,9 @@ public class DataValidator : IDataValidator
 /// </remarks>
 public class RegexMatcher
 {
-    public static bool Match(string input, string pattern)
+    public static bool Match(string? input, string pattern)
     {
-        return new Regex(pattern).IsMatch(input);
+        if (input is null) return false;
+        return Regex.IsMatch(input, pattern);
     }
 }
