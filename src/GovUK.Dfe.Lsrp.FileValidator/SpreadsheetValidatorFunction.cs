@@ -18,7 +18,7 @@ public class SpreadsheetValidatorFunction(ISpreadsheetValidationService validati
         logger.LogInformation("Message Body Length: {length}", message.Body.ToMemory().Length);
         logger.LogInformation("Message Content-Type: {contentType}", message.ContentType);
 
-        FileMessage fileMessage = JsonSerializer.Deserialize<FileMessage>(message.Body) ?? throw new ArgumentException("Message body not JSON");
+        FileMessage fileMessage = JsonSerializer.Deserialize<FileMessage>(message.Body) ?? throw new ArgumentException("Message body is empty or not valid JSON.");
         if (!fileMessage.IsValid) throw new InvalidDataException("Message body not valid");
 
         List<string> errors = [];
