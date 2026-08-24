@@ -18,17 +18,18 @@ public class SpreadsheetValidatorFunction(ISpreadsheetValidationService validati
         logger.LogInformation("Message Body Length: {length}", message.Body.ToMemory().Length);
         logger.LogInformation("Message Content-Type: {contentType}", message.ContentType);
 
-        FileMessage fileMessage = JsonSerializer.Deserialize<FileMessage>(message.Body) ?? throw new ArgumentException("Message body is empty or not valid JSON.");
+        FileUploadedMessage? fileMessage = JsonSerializer.Deserialize<FileUploadedMessage>(message.Body, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        if (fileMessage == null) throw new ArgumentException("Message body is empty or not valid JSON.");
         if (!fileMessage.IsValid) throw new InvalidDataException("Message body not valid");
 
         List<string> errors = [];
-        if (await validationService.ValidateAsync(fileMessage.Filename!, errors))
+        if (await validationService.ValidateAsync(fileMessage.Message!.Payload!.FileUri!, errors))
         {
-            logger.LogInformation("Spreadsheet {filename} is valid", fileMessage.Filename);
+            logger.LogInformation("Spreadsheet is valid for message ID {messageId}", fileMessage.MessageId);
         }
         else
         {
-            logger.LogError("Spreadsheet {filename} is not valid: {errors}", fileMessage.Filename, string.Join(", ", errors));
+            logger.LogError("Spreadsheet is not valid for message ID {messageId}: {errors}", fileMessage.MessageId  , string.Join(", ", errors));
         }
 
         // TODO log validation result to database Files table via new API endpoint

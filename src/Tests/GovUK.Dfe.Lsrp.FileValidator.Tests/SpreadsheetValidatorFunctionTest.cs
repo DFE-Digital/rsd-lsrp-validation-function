@@ -17,12 +17,12 @@ public class SpreadsheetValidatorFunctionTest
         validationService.ValidateAsync(Arg.Any<string>(), Arg.Any<List<string>>()).Returns(Task.FromResult(true));
 
         SpreadsheetValidatorFunction function = new(validationService, NullLogger<SpreadsheetValidatorFunction>.Instance);
-        ServiceBusReceivedMessage message = CreateMessage(new FileMessage
+        ServiceBusReceivedMessage message = CreateMessage(new FileUploadedMessage
         {
-            ApplicationId = Guid.Empty,
-            ApplicationReference = "APP-001",
-            Filename = "test.xlsx",
-            UserEmail = "user@example.com"
+            //ApplicationId = Guid.Empty,
+            //ApplicationReference = "APP-001",
+            //Filename = "test.xlsx",
+            //UserEmail = "user@example.com"
         });
         ServiceBusMessageActions messageActions = Substitute.For<ServiceBusMessageActions>();
 
@@ -37,12 +37,12 @@ public class SpreadsheetValidatorFunctionTest
     {
         ISpreadsheetValidationService validationService = Substitute.For<ISpreadsheetValidationService>();
         SpreadsheetValidatorFunction function = new(validationService, NullLogger<SpreadsheetValidatorFunction>.Instance);
-        ServiceBusReceivedMessage message = CreateMessage(new FileMessage
+        ServiceBusReceivedMessage message = CreateMessage(new FileUploadedMessage
         {
-            ApplicationId = Guid.Empty,
-            ApplicationReference = "APP-001",
-            Filename = "",
-            UserEmail = "user@example.com"
+            //ApplicationId = Guid.Empty,
+            //ApplicationReference = "APP-001",
+            //Filename = "",
+            //UserEmail = "user@example.com"
         });
         ServiceBusMessageActions messageActions = Substitute.For<ServiceBusMessageActions>();
 
@@ -66,7 +66,7 @@ public class SpreadsheetValidatorFunctionTest
         await messageActions.DidNotReceive().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
     }
 
-    private static ServiceBusReceivedMessage CreateMessage(FileMessage payload)
+    private static ServiceBusReceivedMessage CreateMessage(FileUploadedMessage payload)
         => CreateMessageFromJson(JsonSerializer.Serialize(payload));
 
     private static ServiceBusReceivedMessage CreateMessageFromJson(string json)
