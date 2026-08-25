@@ -22,6 +22,7 @@ if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPLICATIONINSIGHT
         .UseAzureMonitorExporter();
 }
 
+builder.Services.AddHttpClient();
 builder.Services.AddScoped<IMessageParser, MessageParser>();
 builder.Services.AddScoped<ISpreadsheetValidationService, SpreadsheetValidationService>();
 builder.Services.AddScoped<IDataValidator, DataValidator>();
