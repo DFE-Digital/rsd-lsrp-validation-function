@@ -19,9 +19,6 @@ public class FileUploadedMessage
     public DateTime SentTime { get; set; }
     public Headers? Headers { get; set; }
     public Host? Host { get; set; }
-
-    [JsonIgnore]
-    public bool IsValid => false; // HACK check message
 }
 
 public class Message
