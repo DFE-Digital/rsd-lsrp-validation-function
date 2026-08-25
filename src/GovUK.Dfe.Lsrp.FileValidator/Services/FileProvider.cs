@@ -12,6 +12,7 @@ public class FileProvider(IHttpClientFactory httpClientFactory) : IFileProvider
         response.EnsureSuccessStatusCode();
         MemoryStream stream = new();
         await response.Content.CopyToAsync(stream);
+        stream.Position = 0;
         return stream;
     }
 }
