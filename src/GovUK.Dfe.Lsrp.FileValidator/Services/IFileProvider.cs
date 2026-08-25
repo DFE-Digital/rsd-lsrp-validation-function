@@ -2,5 +2,5 @@
 
 public interface IFileProvider
 {
-    Task<Stream> GetFileAsync(string filename);
+    Task<Stream> GetFileAsync(string fileUri);
 }
