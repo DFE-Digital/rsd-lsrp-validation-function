@@ -25,7 +25,7 @@ public class SpreadsheetValidationServiceTests(ITestOutputHelper output)
         SpreadsheetValidationService service = new(fileProvider, dataProvider, dataValidator, options);
         List<string> errors = [];
 
-        InvalidOperationException exception = await Assert.ThrowsAsync<InvalidOperationException>(() => service.ValidateAsync("test.xlsx", errors));
+        InvalidOperationException exception = await Assert.ThrowsAsync<InvalidOperationException>(() => service.ValidateAsync("LA1", "test.xlsx", errors));
 
         Assert.Equal("Spreadsheet maps missing in configuration.", exception.Message);
     }
@@ -45,7 +45,7 @@ public class SpreadsheetValidationServiceTests(ITestOutputHelper output)
         SpreadsheetValidationService service = new(fileProvider, dataProvider, dataValidator, options);
         List<string> errors = [];
 
-        InvalidOperationException exception = await Assert.ThrowsAsync<InvalidOperationException>(() => service.ValidateAsync("test.xlsx", errors));
+        InvalidOperationException exception = await Assert.ThrowsAsync<InvalidOperationException>(() => service.ValidateAsync("LA1", "test.xlsx", errors));
 
         Assert.Equal("Workflows missing in configuration.", exception.Message);
     }
@@ -62,7 +62,7 @@ public class SpreadsheetValidationServiceTests(ITestOutputHelper output)
         SpreadsheetValidationService service = new(fileProvider, dataProvider, dataValidator, options);
         List<string> errors = [];
 
-        InvalidOperationException exception = await Assert.ThrowsAsync<InvalidOperationException>(() => service.ValidateAsync("test.xlsx", errors));
+        InvalidOperationException exception = await Assert.ThrowsAsync<InvalidOperationException>(() => service.ValidateAsync("LA1", "test.xlsx", errors));
 
         Assert.Equal("File stream null.", exception.Message);
     }
@@ -73,15 +73,15 @@ public class SpreadsheetValidationServiceTests(ITestOutputHelper output)
         IFileProvider fileProvider = Substitute.For<IFileProvider>();
         fileProvider.GetFileAsync("test.xlsx").Returns(new MemoryStream());
         ISpreadsheetDataProvider dataProvider = Substitute.For<ISpreadsheetDataProvider>();
-        dataProvider.GetDataAsync(Arg.Any<Stream>(), Arg.Any<IEnumerable<SpreadsheetMap>>(), Arg.Any<IList<string>>())
-            .Returns(Task.FromResult<object>(null!));
+        dataProvider.GetData(Arg.Any<Stream>(), Arg.Any<IEnumerable<SpreadsheetMap>>(), Arg.Any<IList<string>>())
+            .Returns((IDictionary<string, object?>)null!);
         IDataValidator dataValidator = Substitute.For<IDataValidator>();
         IOptions<ValidationOptions> options = CreateValidOptions();
 
         SpreadsheetValidationService service = new(fileProvider, dataProvider, dataValidator, options);
         List<string> errors = [];
 
-        InvalidOperationException exception = await Assert.ThrowsAsync<InvalidOperationException>(() => service.ValidateAsync("test.xlsx", errors));
+        InvalidOperationException exception = await Assert.ThrowsAsync<InvalidOperationException>(() => service.ValidateAsync("LA1", "test.xlsx", errors));
 
         Assert.Equal("Spreadsheet data null.", exception.Message);
     }
@@ -92,20 +92,20 @@ public class SpreadsheetValidationServiceTests(ITestOutputHelper output)
         IFileProvider fileProvider = Substitute.For<IFileProvider>();
         fileProvider.GetFileAsync("test.xlsx").Returns(new MemoryStream());
         ISpreadsheetDataProvider dataProvider = Substitute.For<ISpreadsheetDataProvider>();
-        object spreadsheetData = new { Value = "test" };
-        dataProvider.GetDataAsync(Arg.Any<Stream>(), Arg.Any<IEnumerable<SpreadsheetMap>>(), Arg.Any<IList<string>>())
+        IDictionary<string, object?> spreadsheetData = new Dictionary<string, object?> { ["Value"] = "test" };
+        dataProvider.GetData(Arg.Any<Stream>(), Arg.Any<IEnumerable<SpreadsheetMap>>(), Arg.Any<IList<string>>())
             .Returns(spreadsheetData);
         IDataValidator dataValidator = Substitute.For<IDataValidator>();
-        dataValidator.ValidateAsync(Arg.Any<object>(), Arg.Any<IEnumerable<Workflow>>(), Arg.Any<IList<string>>()).Returns(true);
+        dataValidator.ValidateAsync(Arg.Any<object>(), Arg.Any<string>(), Arg.Any<IEnumerable<Workflow>>(), Arg.Any<IList<string>>()).Returns(true);
         IOptions<ValidationOptions> options = CreateValidOptions();
 
         SpreadsheetValidationService service = new(fileProvider, dataProvider, dataValidator, options);
         List<string> errors = [];
 
-        bool result = await service.ValidateAsync("test.xlsx", errors);
+        bool result = await service.ValidateAsync("LA1", "test.xlsx", errors);
 
         Assert.True(result);
-        await dataValidator.Received(1).ValidateAsync(spreadsheetData, Arg.Any<IEnumerable<Workflow>>(), errors);
+        await dataValidator.Received(1).ValidateAsync(spreadsheetData, "LA1", Arg.Any<IEnumerable<Workflow>>(), errors);
     }
 
     [Fact]
@@ -114,8 +114,8 @@ public class SpreadsheetValidationServiceTests(ITestOutputHelper output)
         IFileProvider fileProvider = Substitute.For<IFileProvider>();
         fileProvider.GetFileAsync("test.xlsx").Returns(new MemoryStream());
         ISpreadsheetDataProvider dataProvider = Substitute.For<ISpreadsheetDataProvider>();
-        object spreadsheetData = new { Value = "test" };
-        dataProvider.GetDataAsync(Arg.Any<Stream>(), Arg.Any<IEnumerable<SpreadsheetMap>>(), Arg.Any<IList<string>>())
+        IDictionary<string, object?> spreadsheetData = new Dictionary<string, object?> { ["Value"] = "test" };
+        dataProvider.GetData(Arg.Any<Stream>(), Arg.Any<IEnumerable<SpreadsheetMap>>(), Arg.Any<IList<string>>())
             .Returns(call =>
             {
                 IList<string> errorsArg = call.ArgAt<IList<string>>(2);
@@ -128,11 +128,11 @@ public class SpreadsheetValidationServiceTests(ITestOutputHelper output)
         SpreadsheetValidationService service = new(fileProvider, dataProvider, dataValidator, options);
         List<string> errors = [];
 
-        bool result = await service.ValidateAsync("test.xlsx", errors);
+        bool result = await service.ValidateAsync("LA1", "test.xlsx", errors);
 
         Assert.False(result);
         Assert.Single(errors);
-        await dataValidator.DidNotReceive().ValidateAsync(Arg.Any<object>(), Arg.Any<IEnumerable<Workflow>>(), Arg.Any<IList<string>>());
+        await dataValidator.DidNotReceive().ValidateAsync(Arg.Any<object>(), Arg.Any<string>(), Arg.Any<IEnumerable<Workflow>>(), Arg.Any<IList<string>>());
     }
 
     [Fact]
@@ -151,7 +151,7 @@ public class SpreadsheetValidationServiceTests(ITestOutputHelper output)
 
         SpreadsheetValidationService service = new(fileProvider, dataProvider, dataValidator, options);
         List<string> errors = [];
-        bool result = await service.ValidateAsync("qr-test.xlsx", errors);
+        bool result = await service.ValidateAsync("LA1", "qr-test.xlsx", errors);
 
         output.WriteLine($"Validation result: {result}. Errors: {string.Join(", ", errors)}");
         Assert.True(result);

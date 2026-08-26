@@ -9,14 +9,14 @@ namespace GovUK.Dfe.Lsrp.FileValidator.Tests;
 public class SpreadsheetDataProviderTests
 {
     [Fact]
-    public async Task GetDataAsync_WhenSheetMissing_AddsError()
+    public void GetData_WhenSheetMissing_AddsError()
     {
         SpreadsheetDataProvider provider = new();
         using MemoryStream stream = CreateSpreadsheetStream([new SheetDefinition("Sheet1", [new CellDefinition("A1", "Value")])]);
         List<string> errors = [];
         List<SpreadsheetMap> maps = [new SpreadsheetMap { Worksheet = "Missing", DataMaps = [new DataMap { Name = "Field1", Cell = "A1" }] }];
 
-        object result = await provider.GetDataAsync(stream, maps, errors);
+        var result = provider.GetData(stream, maps, errors);
 
         Assert.NotNull(result);
         Assert.Single(errors);
@@ -24,14 +24,14 @@ public class SpreadsheetDataProviderTests
     }
 
     [Fact]
-    public async Task GetDataAsync_WhenCellMissing_AddsError()
+    public void GetData_WhenCellMissing_AddsError()
     {
         SpreadsheetDataProvider provider = new();
         using MemoryStream stream = CreateSpreadsheetStream([new SheetDefinition("Sheet1", [new CellDefinition("B1", "Value")])]);
         List<string> errors = [];
         List<SpreadsheetMap> maps = [new SpreadsheetMap { Worksheet = "Sheet1", DataMaps = [new DataMap { Name = "Field1", Cell = "A1" }] }];
 
-        object result = await provider.GetDataAsync(stream, maps, errors);
+        var result = provider.GetData(stream, maps, errors);
 
         Assert.NotNull(result);
         Assert.Single(errors);
@@ -39,7 +39,7 @@ public class SpreadsheetDataProviderTests
     }
 
     [Fact]
-    public async Task GetDataAsync_WhenCellIsSharedString_ResolvesValue()
+    public void GetData_WhenCellIsSharedString_ResolvesValue()
     {
         SpreadsheetDataProvider provider = new();
         using MemoryStream stream = CreateSpreadsheetStream(
@@ -48,7 +48,7 @@ public class SpreadsheetDataProviderTests
         List<string> errors = [];
         List<SpreadsheetMap> maps = [new SpreadsheetMap { Worksheet = "Sheet1", DataMaps = [new DataMap { Name = "Field1", Cell = "A1" }] }];
 
-        object result = await provider.GetDataAsync(stream, maps, errors);
+        var result = provider.GetData(stream, maps, errors);
         IDictionary<string, object?> data = Assert.IsAssignableFrom<IDictionary<string, object?>>(result);
 
         Assert.Empty(errors);
@@ -56,7 +56,7 @@ public class SpreadsheetDataProviderTests
     }
 
     [Fact]
-    public async Task GetDataAsync_WhenCellIsBoolean_MapsToTrueFalseStrings()
+    public void GetData_WhenCellIsBoolean_MapsToTrueFalseStrings()
     {
         SpreadsheetDataProvider provider = new();
         using MemoryStream stream = CreateSpreadsheetStream(
@@ -68,7 +68,7 @@ public class SpreadsheetDataProviderTests
             DataMaps = [new DataMap { Name = "FalseValue", Cell = "A1" }, new DataMap { Name = "TrueValue", Cell = "A2" }]
         }];
 
-        object result = await provider.GetDataAsync(stream, maps, errors);
+        var result = provider.GetData(stream, maps, errors);
         IDictionary<string, object?> data = Assert.IsAssignableFrom<IDictionary<string, object?>>(result);
 
         Assert.Empty(errors);
@@ -77,14 +77,14 @@ public class SpreadsheetDataProviderTests
     }
 
     [Fact]
-    public async Task GetDataAsync_WhenCellIsEmpty_ReturnsNullForField()
+    public void GetData_WhenCellIsEmpty_ReturnsNullForField()
     {
         SpreadsheetDataProvider provider = new();
         using MemoryStream stream = CreateSpreadsheetStream([new SheetDefinition("Sheet1", [new CellDefinition("A1", null)])]);
         List<string> errors = [];
         List<SpreadsheetMap> maps = [new SpreadsheetMap { Worksheet = "Sheet1", DataMaps = [new DataMap { Name = "Field1", Cell = "A1" }] }];
 
-        object result = await provider.GetDataAsync(stream, maps, errors);
+        var result = provider.GetData(stream, maps, errors);
         IDictionary<string, object?> data = Assert.IsAssignableFrom<IDictionary<string, object?>>(result);
 
         Assert.Empty(errors);

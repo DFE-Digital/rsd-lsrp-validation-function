@@ -2,5 +2,5 @@
 
 public interface ISpreadsheetValidationService
 {
-    Task<bool> ValidateAsync(string filename, List<string> errors);
+    Task<bool> ValidateAsync(string localAuthority, string fileUri, List<string> errors);
 }

@@ -5,21 +5,24 @@ namespace GovUK.Dfe.Lsrp.FileValidator.Services;
 
 public class DataValidator : IDataValidator
 {
-    public async Task<bool> ValidateAsync(dynamic data, IEnumerable<Workflow> workflows, IList<string> errors)
+    public async Task<bool> ValidateAsync(dynamic data, string localAuthority, IEnumerable<Workflow> workflows, IList<string> errors)
     {
+        dynamic sender = new { LocalAuthority = localAuthority };
         ReSettings reSettings = new() { CustomTypes = [typeof(Utils)] };
         RulesEngine.RulesEngine rulesEngine = new(workflows.ToArray(), reSettings);
         foreach (var workflow in workflows)
         {
-            await RunWorkflowAsync(data, rulesEngine, errors, workflow);
+            await RunWorkflowAsync(data, sender, rulesEngine, errors, workflow);
         }
 
         return !errors.Any();
     }
 
-    private static async Task RunWorkflowAsync(dynamic data, RulesEngine.RulesEngine rulesEngine, IList<string> errors, Workflow workflow)
+    private static async Task RunWorkflowAsync(dynamic data, dynamic sender, RulesEngine.RulesEngine rulesEngine, IList<string> errors, Workflow workflow)
     {
-        IEnumerable<RuleResultTree> results = await rulesEngine.ExecuteAllRulesAsync(workflow.WorkflowName, data);
+        RuleParameter[] ruleParams = [new("input1", data), new("input2", sender)];
+        IEnumerable<RuleResultTree> results = await rulesEngine.ExecuteAllRulesAsync(workflow.WorkflowName, ruleParams);
+
         foreach (RuleResultTree? result in results.Where(x => !x.IsSuccess))
         {
             errors.Add($"{workflow.WorkflowName} {result.Rule}: {result.ExceptionMessage}");

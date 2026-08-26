@@ -4,5 +4,5 @@ namespace GovUK.Dfe.Lsrp.FileValidator.Services;
 
 public interface ISpreadsheetDataProvider
 {
-    Task<object> GetDataAsync(Stream stream, IEnumerable<SpreadsheetMap> spreadsheetMaps, IList<string> errors);
+    IDictionary<string, object?> GetData(Stream stream, IEnumerable<SpreadsheetMap> spreadsheetMaps, IList<string> errors);
 }

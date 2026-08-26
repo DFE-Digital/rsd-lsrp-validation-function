@@ -7,6 +7,7 @@ namespace GovUK.Dfe.Lsrp.FileValidator
         public string? FileUri { get; private set; }
         public string? MessageId { get; private set; }
         public string? ApplicationId { get; private set; }
+        public string? LocalAuthority { get; private set; }
 
         public bool Parse(FileUploadedMessage fileMessage)
         {
@@ -15,6 +16,7 @@ namespace GovUK.Dfe.Lsrp.FileValidator
             FileUri = fileMessage.Message?.Payload?.FileUri;
             MessageId = fileMessage.MessageId;
             ApplicationId = fileMessage.Message?.Metadata?.ApplicationId;
+            LocalAuthority = fileMessage.Message?.Metadata?.LocalAuthority; // TODO: add LA to SB message
 
             return fileMessage.Message != null && HasFile(fileMessage.Message) && HasApplication(fileMessage.Message);
         }

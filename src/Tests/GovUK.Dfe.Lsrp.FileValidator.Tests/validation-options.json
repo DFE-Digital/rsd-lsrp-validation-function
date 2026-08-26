@@ -23,7 +23,13 @@
       "Worksheet": "Guidance"
     },
     {
-      "Worksheet": "Cover"
+      "Worksheet": "Cover",
+      "DataMaps": [
+        {
+          "Name": "LocalAuthority",
+          "Cell": "B13"
+        }
+      ]
     }
   ],
   "Workflows": [
@@ -32,8 +38,18 @@
       "Rules": [
         {
           "RuleName": "Rule1",
-          "Expression": "Utils.MatchRegex(DataYear, \"^20\\\\d{2}-\\\\d{2} Data$\")",
+          "Expression": "Utils.MatchRegex(input1.DataYear, \"^20\\\\d{2}-\\\\d{2} Data$\")",
           "ErrorMessage": "DataYear must be of format \"20xx-yy Data\""
+        }
+      ]
+    },
+    {
+      "WorkflowName": "Cover",
+      "Rules": [
+        {
+          "RuleName": "Rule1",
+          "Expression": "input1.LocalAuthority = input2.LocalAuthority",
+          "ErrorMessage": "Local Authority must match"
         }
       ]
     }

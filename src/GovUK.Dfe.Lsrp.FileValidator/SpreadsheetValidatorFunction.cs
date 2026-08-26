@@ -23,7 +23,7 @@ public class SpreadsheetValidatorFunction(IMessageParser messageParser, ISpreads
         if (!messageParser.Parse(fileMessage)) throw new InvalidDataException("Message body not valid");
 
         List<string> errors = [];
-        if (await validationService.ValidateAsync(messageParser.FileUri!, errors))
+        if (await validationService.ValidateAsync(messageParser.LocalAuthority!, messageParser.FileUri!, errors))
         {
             logger.LogInformation("Spreadsheet is valid for message ID {messageId}.", messageParser.MessageId);
         }
