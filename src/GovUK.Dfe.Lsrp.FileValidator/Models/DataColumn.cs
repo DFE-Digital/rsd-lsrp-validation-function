@@ -1,8 +1,7 @@
-﻿namespace GovUK.Dfe.Lsrp.FileValidator.Models
+﻿namespace GovUK.Dfe.Lsrp.FileValidator.Models;
+
+public class DataColumn
 {
-    public class DataColumn
-    {
-        public string? ColumnName { get; set; }
-        public bool HasData { get; set; }
-    }
+    public string? ColumnName { get; set; }
+    public bool HasData { get; set; }
 }
