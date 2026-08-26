@@ -1,8 +1,6 @@
-﻿using DocumentFormat.OpenXml.Office2010.Excel;
-using DocumentFormat.OpenXml.Packaging;
+﻿using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using GovUK.Dfe.Lsrp.FileValidator.Models;
-using System.Diagnostics;
 using System.Dynamic;
 
 namespace GovUK.Dfe.Lsrp.FileValidator.Services;
