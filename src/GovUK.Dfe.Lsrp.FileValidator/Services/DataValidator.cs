@@ -7,7 +7,7 @@ public class DataValidator : IDataValidator
 {
     public async Task<bool> ValidateAsync(dynamic data, IEnumerable<Workflow> workflows, IList<string> errors)
     {
-        ReSettings reSettings = new() { CustomTypes = [typeof(RegexMatcher)] };
+        ReSettings reSettings = new() { CustomTypes = [typeof(Utils)] };
         RulesEngine.RulesEngine rulesEngine = new(workflows.ToArray(), reSettings);
         foreach (var workflow in workflows)
         {
@@ -28,14 +28,14 @@ public class DataValidator : IDataValidator
 }
 
 /// <summary>
-/// A custom matcher class for regex validation in RulesEngine.
+/// A custom utility class for use in RulesEngine.
 /// </summary>
-/// <remarks>
-/// Can't get Regex.IsMatch to work in RulesEngine, so we create a wrapper class to expose it as a method.
-/// </remarks>
-public class RegexMatcher
+public class Utils
 {
-    public static bool Match(string? input, string pattern)
+    /// <remarks>
+    /// Can't get Regex.IsMatch to work in RulesEngine, so we create a wrapper class to expose it as a method.
+    /// </remarks>
+    public static bool MatchRegex(string? input, string pattern)
     {
         if (input is null) return false;
         return Regex.IsMatch(input, pattern);
