@@ -74,6 +74,27 @@ public class SpreadsheetDataProvider : ISpreadsheetDataProvider
                 }
                 data.Add(dataMap.Name!, cellValue);
             }
+
+            if (spreadsheetMap.DataColumns != null && spreadsheetMap.DataColumns.Any())
+            {
+                IEnumerable<Cell>? cells = wsPart.Worksheet?.Descendants<Cell>();
+                if (cells != null && cells.Any())
+                {
+                    foreach (DataColumn dataColumn in spreadsheetMap.DataColumns)
+                    {
+                        if (string.IsNullOrEmpty(dataColumn.ColumnName)) continue;
+                        var columnHasData = cells.Any(c => c.CellReference != null && c.CellReference.HasValue && c.CellReference.Value!.StartsWith(dataColumn.ColumnName) && !string.IsNullOrEmpty(c.InnerText));
+                        if (dataColumn.HasData && !columnHasData)
+                        {
+                            errors.Add($"Column '{dataColumn.ColumnName}' is expected to have data but does not.");
+                        }
+                        else if (!dataColumn.HasData && columnHasData)
+                        {
+                            errors.Add($"Column '{dataColumn.ColumnName}' is not expected to have data but does.");
+                        }
+                    }
+                }
+            }
         }
 
         return Task.FromResult((object)data);
