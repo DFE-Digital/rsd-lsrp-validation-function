@@ -40,6 +40,11 @@ public class Utils
     /// </summary>
     public static bool CheckYear(string year)
     {
+        if (string.IsNullOrEmpty(year))
+        {
+            return false;
+        }
+
         var isValid = Regex.IsMatch(year, "^20\\d{2}-\\d{2} Data$");
         if (!isValid)
         {
