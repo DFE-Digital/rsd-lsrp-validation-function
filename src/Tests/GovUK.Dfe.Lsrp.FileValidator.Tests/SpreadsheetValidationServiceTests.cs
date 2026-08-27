@@ -171,7 +171,7 @@ public class SpreadsheetValidationServiceTests(ITestOutputHelper output)
     }
 
     [Fact]
-    public async Task ValidateAsync_WithInValidData_ReturnsFalse()
+    public async Task ValidateAsync_WithInvalidData_ReturnsFalse()
     {
         const string filename = "qr-test-x.xlsx";
         IFileProvider fileProvider = Substitute.For<IFileProvider>();
