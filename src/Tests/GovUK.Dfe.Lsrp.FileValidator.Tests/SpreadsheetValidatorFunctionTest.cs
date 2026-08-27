@@ -14,7 +14,7 @@ public class SpreadsheetValidatorFunctionTest
     public async Task Run_WhenMessageIsValid_CallsValidationAndCompletesMessage()
     {
         ISpreadsheetValidationService validationService = Substitute.For<ISpreadsheetValidationService>();
-        validationService.ValidateAsync("LA1", "test.xlsx", Arg.Any<List<string>>()).Returns(Task.FromResult(true));
+        validationService.ValidateAsync(Arg.Any<User>(), "test.xlsx", Arg.Any<List<string>>()).Returns(Task.FromResult(true));
 
         IMessageParser messageParser = new MessageParser();
         SpreadsheetValidatorFunction function = new(messageParser, validationService, NullLogger<SpreadsheetValidatorFunction>.Instance);
@@ -23,7 +23,7 @@ public class SpreadsheetValidatorFunctionTest
 
         await function.Run(message, messageActions);
 
-        await validationService.Received(1).ValidateAsync("LA1", "test.xlsx", Arg.Any<List<string>>());
+        await validationService.Received(1).ValidateAsync(Arg.Any<User>(), "test.xlsx", Arg.Any<List<string>>());
         await messageActions.Received(1).CompleteMessageAsync(message, Arg.Any<CancellationToken>());
     }
 
@@ -38,7 +38,7 @@ public class SpreadsheetValidatorFunctionTest
 
         await Assert.ThrowsAsync<InvalidDataException>(() => function.Run(message, messageActions));
 
-        await validationService.DidNotReceive().ValidateAsync("LA1", "test.xlsx", Arg.Any<List<string>>());
+        await validationService.DidNotReceive().ValidateAsync(Arg.Any<User>(), "test.xlsx", Arg.Any<List<string>>());
         await messageActions.DidNotReceive().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
     }
 
@@ -80,7 +80,7 @@ public class SpreadsheetValidatorFunctionTest
 
         await Assert.ThrowsAsync<ArgumentException>(() => function.Run(message, messageActions));
 
-        await validationService.DidNotReceive().ValidateAsync("LA1", "test.xlsx", Arg.Any<List<string>>());
+        await validationService.DidNotReceive().ValidateAsync(Arg.Any<User>(), "test.xlsx", Arg.Any<List<string>>());
         await messageActions.DidNotReceive().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
     }
 }
