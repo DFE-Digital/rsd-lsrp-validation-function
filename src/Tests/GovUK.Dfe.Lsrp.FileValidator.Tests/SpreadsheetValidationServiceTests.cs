@@ -181,7 +181,7 @@ public class SpreadsheetValidationServiceTests(ITestOutputHelper output)
 
         IDataValidator dataValidator = new DataValidator();
 
-        ValidationOptions validationOptions = JsonSerializer.Deserialize<ValidationOptions>(File.ReadAllText("validation-options.json")) ?? throw new InvalidOperationException("ValidationOptions missing in validation-options.json");
+        ValidationOptions validationOptions = JsonSerializer.Deserialize<ValidationOptions>(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "validation-options.json"))) ?? throw new InvalidOperationException("ValidationOptions missing in validation-options.json");
         IOptions<ValidationOptions> options = Substitute.For<IOptions<ValidationOptions>>();
         options.Value.Returns(validationOptions);
 
