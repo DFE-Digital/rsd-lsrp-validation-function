@@ -40,6 +40,7 @@ public class Metadata
     public string? ApplicationId { get; set; }
     public string? ApplicationReference { get; set; }
     public string? TemplateId { get; set; }
+    public string? LocalAuthority { get; set; }
 }
 
 public class Headers

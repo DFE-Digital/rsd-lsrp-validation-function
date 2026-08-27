@@ -22,15 +22,11 @@ public class SpreadsheetValidatorFunction(IMessageParser messageParser, ISpreads
 
         if (!messageParser.Parse(fileMessage)) throw new InvalidDataException("Message body not valid");
 
+        User user = new() { LocalAuthority = messageParser.LocalAuthority! };
+
         List<string> errors = [];
-        if (await validationService.ValidateAsync(messageParser.FileUri!, errors))
-        {
-            logger.LogInformation("Spreadsheet is valid for message ID {messageId}.", messageParser.MessageId);
-        }
-        else
-        {
-            logger.LogError("Spreadsheet is not valid for message ID {messageId}: {errors}", messageParser.MessageId, string.Join(", ", errors));
-        }
+        bool isValid = await validationService.ValidateAsync(user, messageParser.FileUri!, errors);
+        logger.LogInformation("Spreadsheet validation {result} for message ID {messageId}. {errors}", isValid ? "succeeded" : "failed", messageParser.MessageId, string.Join(", ", errors));
 
         // TODO log validation result to database Files table via new API endpoint
 

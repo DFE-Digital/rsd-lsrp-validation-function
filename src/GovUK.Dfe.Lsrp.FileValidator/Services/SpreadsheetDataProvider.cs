@@ -7,14 +7,14 @@ namespace GovUK.Dfe.Lsrp.FileValidator.Services;
 
 public class SpreadsheetDataProvider : ISpreadsheetDataProvider
 {
-    public Task<object> GetDataAsync(Stream stream, IEnumerable<SpreadsheetMap> spreadsheetMaps, IList<string> errors)
+    public IDictionary<string, object?> GetData(Stream stream, IEnumerable<SpreadsheetMap> spreadsheetMaps, IList<string> errors)
     {
         using SpreadsheetDocument document = SpreadsheetDocument.Open(stream, false);
         WorkbookPart? wbPart = document.WorkbookPart;
         if (wbPart == null)
         {
             errors.Add("WorkbookPart is null.");
-            return Task.FromResult((object)new ExpandoObject());
+            return new ExpandoObject();
         }
 
         var data = new ExpandoObject() as IDictionary<string, object?>;
@@ -97,6 +97,6 @@ public class SpreadsheetDataProvider : ISpreadsheetDataProvider
             }
         }
 
-        return Task.FromResult((object)data);
+        return data;
     }
 }
