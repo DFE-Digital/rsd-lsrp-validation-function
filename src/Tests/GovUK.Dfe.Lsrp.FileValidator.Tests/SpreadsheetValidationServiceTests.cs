@@ -192,7 +192,7 @@ public class SpreadsheetValidationServiceTests(ITestOutputHelper output)
 
         output.WriteLine($"Validation result: {result}. Errors: {string.Join(", ", errors)}");
         Assert.False(result);
-        Assert.True(errors.Count > 0);
+        Assert.NotEmpty(errors);
     }
 
     private static IOptions<ValidationOptions> CreateValidOptions()
