@@ -148,9 +148,10 @@ public class SpreadsheetValidationServiceTests(ITestOutputHelper output)
     [Fact]
     public async Task ValidateAsync_WithValidData_ReturnsTrue()
     {
+        const string filename = "qr-test.xlsx";
         IFileProvider fileProvider = Substitute.For<IFileProvider>();
-        string excelPath = Path.Combine(AppContext.BaseDirectory, "qr-test.xlsx");
-        fileProvider.GetFileAsync("qr-test.xlsx").Returns(_ => new MemoryStream(File.ReadAllBytes(excelPath)));
+        string excelPath = Path.Combine(AppContext.BaseDirectory, filename);
+        fileProvider.GetFileAsync(filename).Returns(_ => new MemoryStream(File.ReadAllBytes(excelPath)));
         ISpreadsheetDataProvider dataProvider = new SpreadsheetDataProvider();
 
         IDataValidator dataValidator = new DataValidator();
@@ -162,11 +163,36 @@ public class SpreadsheetValidationServiceTests(ITestOutputHelper output)
         SpreadsheetValidationService service = new(fileProvider, dataProvider, dataValidator, options);
         List<string> errors = [];
         User user = new() { LocalAuthority = "LA1" };
-        bool result = await service.ValidateAsync(user, "qr-test.xlsx", errors);
+        bool result = await service.ValidateAsync(user, filename, errors);
 
         output.WriteLine($"Validation result: {result}. Errors: {string.Join(", ", errors)}");
         Assert.True(result);
         Assert.Empty(errors);
+    }
+
+    [Fact]
+    public async Task ValidateAsync_WithInValidData_ReturnsFalse()
+    {
+        const string filename = "qr-test-x.xlsx";
+        IFileProvider fileProvider = Substitute.For<IFileProvider>();
+        string excelPath = Path.Combine(AppContext.BaseDirectory, filename);
+        fileProvider.GetFileAsync(filename).Returns(_ => new MemoryStream(File.ReadAllBytes(excelPath)));
+        ISpreadsheetDataProvider dataProvider = new SpreadsheetDataProvider();
+
+        IDataValidator dataValidator = new DataValidator();
+
+        ValidationOptions validationOptions = JsonSerializer.Deserialize<ValidationOptions>(File.ReadAllText("validation-options.json")) ?? throw new InvalidOperationException("ValidationOptions missing in validation-options.json");
+        IOptions<ValidationOptions> options = Substitute.For<IOptions<ValidationOptions>>();
+        options.Value.Returns(validationOptions);
+
+        SpreadsheetValidationService service = new(fileProvider, dataProvider, dataValidator, options);
+        List<string> errors = [];
+        User user = new() { LocalAuthority = "LA1" };
+        bool result = await service.ValidateAsync(user, filename, errors);
+
+        output.WriteLine($"Validation result: {result}. Errors: {string.Join(", ", errors)}");
+        Assert.False(result);
+        Assert.True(errors.Count > 0);
     }
 
     private static IOptions<ValidationOptions> CreateValidOptions()

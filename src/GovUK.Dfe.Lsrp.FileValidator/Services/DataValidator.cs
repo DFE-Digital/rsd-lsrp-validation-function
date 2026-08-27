@@ -35,12 +35,20 @@ public class DataValidator : IDataValidator
 /// </summary>
 public class Utils
 {
-    /// <remarks>
-    /// Can't get Regex.IsMatch to work in RulesEngine, so we create a wrapper class to expose it as a method.
-    /// </remarks>
-    public static bool MatchRegex(string? input, string pattern)
+    /// <summary>
+    /// Checks if the given year string is in the format "20xx-yy Data" and represents consecutive years.
+    /// </summary>
+    public static bool CheckYear(string year)
     {
-        if (input is null) return false;
-        return Regex.IsMatch(input, pattern);
+        var isValid = Regex.IsMatch(year, "^20\\d{2}-\\d{2} Data$");
+        if (!isValid)
+        {
+            return false;
+        }
+
+        string[] years = year.Split('-');
+        int year1 = int.Parse(years[0]);
+        int year2 = int.Parse(years[1][..2]) + 2000; // Convert yy to yyyy
+        return year2 - year1 == 1;
     }
 }
