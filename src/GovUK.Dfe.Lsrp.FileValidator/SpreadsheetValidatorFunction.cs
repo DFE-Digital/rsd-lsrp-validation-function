@@ -26,7 +26,7 @@ public class SpreadsheetValidatorFunction(IMessageParser messageParser, ISpreads
 
         List<string> errors = [];
         bool isValid = await validationService.ValidateAsync(user, messageParser.FileUri!, errors);
-        logger.LogError("Spreadsheet validation {result} for message ID {messageId}. {errors}", isValid ? "succeeded" : "failed", messageParser.MessageId, string.Join(", ", errors));
+        logger.LogInformation("Spreadsheet validation {result} for message ID {messageId}. {errors}", isValid ? "succeeded" : "failed", messageParser.MessageId, string.Join(", ", errors));
 
         // TODO log validation result to database Files table via new API endpoint
 
