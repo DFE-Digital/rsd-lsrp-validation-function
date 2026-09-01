@@ -15,10 +15,7 @@ public class FileValidationResultServiceTest(ITestOutputHelper output)
         var httpClient = new HttpClient();
         var httpClientFactory = Substitute.For<IHttpClientFactory>();
         httpClientFactory.CreateClient().Returns(httpClient);
-        var configuration = Substitute.For<IConfiguration>();
-        configuration["TenantId"].Returns("22222222-2222-4222-8222-222222222222");
-        configuration["ValidationResultFilesUrl"].Returns("https://api-dev-flexforms.rsd.education.gov.uk/v1/integrations/files");
-        configuration["ValidationResultApiKey"].Returns("local-file-validation-dev-key");
+        IConfiguration configuration = TestConfig.GetConfiguration();
         var logger = new FakeLogger(output);
         var service = new FileValidationResultService(httpClientFactory, configuration, logger);
         var fileId = "test-application-id";
