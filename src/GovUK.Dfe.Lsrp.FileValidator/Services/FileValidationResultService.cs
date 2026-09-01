@@ -39,6 +39,8 @@ public class FileValidationResultService : IFileValidationResultService
 
     public async Task SendResultAsync(string fileId, bool isValid, IEnumerable<string> errors)
     {
+        if (string.IsNullOrWhiteSpace(fileId)) throw new ArgumentException("FileId is empty or whitespace", nameof(fileId));
+
         HttpClient httpClient = httpClientFactory.CreateClient();
         httpClient.DefaultRequestHeaders.Add("X-Tenant-ID", TenantId);
         httpClient.DefaultRequestHeaders.Add("X-Api-Key", ApiKey);

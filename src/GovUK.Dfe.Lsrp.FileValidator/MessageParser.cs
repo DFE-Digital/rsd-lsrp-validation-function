@@ -24,7 +24,7 @@ namespace GovUK.Dfe.Lsrp.FileValidator
         }
 
         private static bool ValidateMessage(FileUploadedMessage fileMessage) => fileMessage.Message != null && HasFile(fileMessage.Message) && HasApplication(fileMessage.Message);
-        private static bool HasFile(Message? message) => message != null && message.Payload != null && !string.IsNullOrEmpty(message.Payload.FileUri);
+        private static bool HasFile(Message? message) => message != null && message.Payload != null && !string.IsNullOrEmpty(message.Payload.FileUri) && !string.IsNullOrEmpty(message.Payload.FileId);
         private static bool HasApplication(Message? message) => message != null && message.Metadata != null && !string.IsNullOrEmpty(message.Metadata.ApplicationId) && !string.IsNullOrEmpty(message.Metadata.ApplicationReference);
     }
 }
