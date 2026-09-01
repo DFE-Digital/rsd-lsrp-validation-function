@@ -7,7 +7,11 @@ using System.Text.Json;
 
 namespace GovUK.Dfe.Lsrp.FileValidator;
 
-public class SpreadsheetValidatorFunction(IMessageParser messageParser, ISpreadsheetValidationService validationService, ILogger<SpreadsheetValidatorFunction> logger)
+public class SpreadsheetValidatorFunction(
+    IMessageParser messageParser, 
+    ISpreadsheetValidationService validationService, 
+    IFileValidationResultService validationResultService, 
+    ILogger<SpreadsheetValidatorFunction> logger)
 {
     private readonly JsonSerializerOptions jsonOptions = new() { PropertyNameCaseInsensitive = true };
 
@@ -28,7 +32,7 @@ public class SpreadsheetValidatorFunction(IMessageParser messageParser, ISpreads
         bool isValid = await validationService.ValidateAsync(user, messageParser.FileUri!, errors);
         logger.LogInformation("Spreadsheet validation {result} for message ID {messageId}. {errors}", isValid ? "succeeded" : "failed", messageParser.MessageId, string.Join(", ", errors));
 
-        // TODO log validation result to database Files table via new API endpoint
+        await validationResultService.SendResultAsync(messageParser.FileId!, isValid, errors);
 
         await messageActions.CompleteMessageAsync(message);
     }

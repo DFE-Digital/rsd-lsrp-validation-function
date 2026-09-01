@@ -33,6 +33,7 @@ public class Message
 public class Payload
 {
     public string? FileUri { get; set; }
+    public string? FileId { get; set; }
 }
 
 public class Metadata

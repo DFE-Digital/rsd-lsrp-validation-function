@@ -17,7 +17,9 @@ public class SpreadsheetValidatorFunctionTest
         validationService.ValidateAsync(Arg.Any<User>(), "test.xlsx", Arg.Any<List<string>>()).Returns(Task.FromResult(true));
 
         IMessageParser messageParser = new MessageParser();
-        SpreadsheetValidatorFunction function = new(messageParser, validationService, NullLogger<SpreadsheetValidatorFunction>.Instance);
+        IFileValidationResultService validationResultService = Substitute.For<IFileValidationResultService>();
+        validationResultService.SendResultAsync(Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<IEnumerable<string>>()).Returns(Task.CompletedTask);
+        SpreadsheetValidatorFunction function = new(messageParser, validationService, validationResultService, NullLogger<SpreadsheetValidatorFunction>.Instance);
         ServiceBusReceivedMessage message = CreateMessage("test.xlsx");
         ServiceBusMessageActions messageActions = Substitute.For<ServiceBusMessageActions>();
 
@@ -32,7 +34,8 @@ public class SpreadsheetValidatorFunctionTest
     {
         ISpreadsheetValidationService validationService = Substitute.For<ISpreadsheetValidationService>();
         IMessageParser messageParser = new MessageParser();
-        SpreadsheetValidatorFunction function = new(messageParser, validationService, NullLogger<SpreadsheetValidatorFunction>.Instance);
+        IFileValidationResultService validationResultService = Substitute.For<IFileValidationResultService>();
+        SpreadsheetValidatorFunction function = new(messageParser, validationService, validationResultService, NullLogger<SpreadsheetValidatorFunction>.Instance);
         ServiceBusReceivedMessage message = CreateMessage(null);
         ServiceBusMessageActions messageActions = Substitute.For<ServiceBusMessageActions>();
 
@@ -71,7 +74,8 @@ public class SpreadsheetValidatorFunctionTest
     {
         ISpreadsheetValidationService validationService = Substitute.For<ISpreadsheetValidationService>();
         IMessageParser messageParser = new MessageParser();
-        SpreadsheetValidatorFunction function = new(messageParser, validationService, NullLogger<SpreadsheetValidatorFunction>.Instance);
+        IFileValidationResultService validationResultService = Substitute.For<IFileValidationResultService>();
+        SpreadsheetValidatorFunction function = new(messageParser, validationService, validationResultService, NullLogger<SpreadsheetValidatorFunction>.Instance);
         ServiceBusReceivedMessage message = ServiceBusModelFactory.ServiceBusReceivedMessage(
             body: BinaryData.FromString(JsonSerializer.Serialize<object>(null)),
             messageId: Guid.Empty.ToString(),
