@@ -8,6 +8,7 @@ namespace GovUK.Dfe.Lsrp.FileValidator
         string? FileUri { get; }
         string? MessageId { get; }
         string? LocalAuthority { get; }
+        string? FileId { get; }
 
         bool Parse(FileUploadedMessage fileMessage);
     }

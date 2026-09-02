@@ -17,13 +17,16 @@ public class SpreadsheetValidatorFunctionTest
         validationService.ValidateAsync(Arg.Any<User>(), "test.xlsx", Arg.Any<List<string>>()).Returns(Task.FromResult(true));
 
         IMessageParser messageParser = new MessageParser();
-        SpreadsheetValidatorFunction function = new(messageParser, validationService, NullLogger<SpreadsheetValidatorFunction>.Instance);
-        ServiceBusReceivedMessage message = CreateMessage("test.xlsx");
+        IFileValidationResultService validationResultService = Substitute.For<IFileValidationResultService>();
+        validationResultService.SendResultAsync(Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<IEnumerable<string>>()).Returns(Task.CompletedTask);
+        SpreadsheetValidatorFunction function = new(messageParser, validationService, validationResultService, NullLogger<SpreadsheetValidatorFunction>.Instance);
+        ServiceBusReceivedMessage message = CreateMessage("test.xlsx", "file-id-123");
         ServiceBusMessageActions messageActions = Substitute.For<ServiceBusMessageActions>();
 
         await function.Run(message, messageActions);
 
         await validationService.Received(1).ValidateAsync(Arg.Any<User>(), "test.xlsx", Arg.Any<List<string>>());
+        await validationResultService.Received(1).SendResultAsync(Arg.Any<string>(), true, Arg.Any<IEnumerable<string>>());
         await messageActions.Received(1).CompleteMessageAsync(message, Arg.Any<CancellationToken>());
     }
 
@@ -32,17 +35,19 @@ public class SpreadsheetValidatorFunctionTest
     {
         ISpreadsheetValidationService validationService = Substitute.For<ISpreadsheetValidationService>();
         IMessageParser messageParser = new MessageParser();
-        SpreadsheetValidatorFunction function = new(messageParser, validationService, NullLogger<SpreadsheetValidatorFunction>.Instance);
-        ServiceBusReceivedMessage message = CreateMessage(null);
+        IFileValidationResultService validationResultService = Substitute.For<IFileValidationResultService>();
+        SpreadsheetValidatorFunction function = new(messageParser, validationService, validationResultService, NullLogger<SpreadsheetValidatorFunction>.Instance);
+        ServiceBusReceivedMessage message = CreateMessage(null, null);
         ServiceBusMessageActions messageActions = Substitute.For<ServiceBusMessageActions>();
 
         await Assert.ThrowsAsync<InvalidDataException>(() => function.Run(message, messageActions));
 
         await validationService.DidNotReceive().ValidateAsync(Arg.Any<User>(), "test.xlsx", Arg.Any<List<string>>());
+        await validationResultService.DidNotReceive().SendResultAsync(Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<IEnumerable<string>>());
         await messageActions.DidNotReceive().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
     }
 
-    private static ServiceBusReceivedMessage CreateMessage(string? fileUri)
+    private static ServiceBusReceivedMessage CreateMessage(string? fileUri, string? fileId)
     {
         var message = new FileUploadedMessage
         {
@@ -56,7 +61,8 @@ public class SpreadsheetValidatorFunctionTest
                 },
                 Payload = new Payload
                 {
-                    FileUri = fileUri
+                    FileUri = fileUri,
+                    FileId = fileId
                 }
             }
         };
@@ -71,7 +77,8 @@ public class SpreadsheetValidatorFunctionTest
     {
         ISpreadsheetValidationService validationService = Substitute.For<ISpreadsheetValidationService>();
         IMessageParser messageParser = new MessageParser();
-        SpreadsheetValidatorFunction function = new(messageParser, validationService, NullLogger<SpreadsheetValidatorFunction>.Instance);
+        IFileValidationResultService validationResultService = Substitute.For<IFileValidationResultService>();
+        SpreadsheetValidatorFunction function = new(messageParser, validationService, validationResultService, NullLogger<SpreadsheetValidatorFunction>.Instance);
         ServiceBusReceivedMessage message = ServiceBusModelFactory.ServiceBusReceivedMessage(
             body: BinaryData.FromString(JsonSerializer.Serialize<object>(null)),
             messageId: Guid.Empty.ToString(),
@@ -81,6 +88,7 @@ public class SpreadsheetValidatorFunctionTest
         await Assert.ThrowsAsync<ArgumentException>(() => function.Run(message, messageActions));
 
         await validationService.DidNotReceive().ValidateAsync(Arg.Any<User>(), "test.xlsx", Arg.Any<List<string>>());
+        await validationResultService.DidNotReceive().SendResultAsync(Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<IEnumerable<string>>());
         await messageActions.DidNotReceive().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
     }
 }

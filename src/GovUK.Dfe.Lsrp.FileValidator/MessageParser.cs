@@ -5,6 +5,7 @@ namespace GovUK.Dfe.Lsrp.FileValidator
     public class MessageParser : IMessageParser
     {
         public string? FileUri { get; private set; }
+        public string? FileId { get; private set; }
         public string? MessageId { get; private set; }
         public string? ApplicationId { get; private set; }
         public string? LocalAuthority { get; private set; }
@@ -14,15 +15,16 @@ namespace GovUK.Dfe.Lsrp.FileValidator
             if (!ValidateMessage(fileMessage)) return false;
 
             FileUri = fileMessage.Message?.Payload?.FileUri;
+            FileId = fileMessage.Message?.Payload?.FileId;
             MessageId = fileMessage.MessageId;
             ApplicationId = fileMessage.Message?.Metadata?.ApplicationId;
-            LocalAuthority = fileMessage.Message?.Metadata?.LocalAuthority; // TODO: add LA to SB message
+            LocalAuthority = fileMessage.Message?.Metadata?.LocalAuthority;
 
             return fileMessage.Message != null && HasFile(fileMessage.Message) && HasApplication(fileMessage.Message);
         }
 
         private static bool ValidateMessage(FileUploadedMessage fileMessage) => fileMessage.Message != null && HasFile(fileMessage.Message) && HasApplication(fileMessage.Message);
-        private static bool HasFile(Message? message) => message != null && message.Payload != null && !string.IsNullOrEmpty(message.Payload.FileUri);
+        private static bool HasFile(Message? message) => message != null && message.Payload != null && !string.IsNullOrEmpty(message.Payload.FileUri) && !string.IsNullOrEmpty(message.Payload.FileId);
         private static bool HasApplication(Message? message) => message != null && message.Metadata != null && !string.IsNullOrEmpty(message.Metadata.ApplicationId) && !string.IsNullOrEmpty(message.Metadata.ApplicationReference);
     }
 }
