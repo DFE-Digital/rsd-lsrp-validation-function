@@ -12,6 +12,7 @@ var builder = FunctionsApplication.CreateBuilder(args);
 builder.ConfigureFunctionsWebApplication();
 
 builder.Configuration.AddJsonFile("appsettings.json");
+builder.Configuration.AddJsonFile("local.settings.json", optional: true);
 builder.Services.Configure<ValidationOptions>(builder.Configuration.GetSection("ValidationOptions"));
 
 if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING")))
@@ -20,6 +21,8 @@ if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPLICATIONINSIGHT
         .UseFunctionsWorkerDefaults()
         .UseAzureMonitorExporter();
 }
+
+builder.Configuration.AddUserSecrets<Program>(optional: true);
 
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<ISpreadsheetValidationService, SpreadsheetValidationService>();

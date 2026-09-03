@@ -17,9 +17,7 @@ public class SpreadsheetValidatorFunction(
     [Function(nameof(SpreadsheetValidatorFunction))]
     public async Task Run([ServiceBusTrigger("%Topic%", "%Subscription%")] ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions)
     {
-        logger.LogInformation("Message ID: {id}", message.MessageId);
-        logger.LogInformation("Message Body Length: {length}", message.Body.ToMemory().Length);
-        logger.LogInformation("Message Content-Type: {contentType}", message.ContentType);
+        logger.LogInformation("Message ID: {id}. Body Length: {length}. Content-Type: {contentType}", message.MessageId, message.Body.ToMemory().Length, message.ContentType);
 
         FileUploadedMessage? fileMessage = JsonSerializer.Deserialize<FileUploadedMessage>(message.Body.ToString(), jsonOptions) ?? throw new ArgumentException("Message body is empty or not valid JSON.");
 
