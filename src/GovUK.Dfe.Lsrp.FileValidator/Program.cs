@@ -1,5 +1,4 @@
 using Azure.Monitor.OpenTelemetry.Exporter;
-using GovUK.Dfe.Lsrp.FileValidator;
 using GovUK.Dfe.Lsrp.FileValidator.Models;
 using GovUK.Dfe.Lsrp.FileValidator.Services;
 using Microsoft.Azure.Functions.Worker.Builder;
@@ -23,7 +22,6 @@ if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPLICATIONINSIGHT
 }
 
 builder.Services.AddHttpClient();
-builder.Services.AddScoped<IMessageParser, MessageParser>();
 builder.Services.AddScoped<ISpreadsheetValidationService, SpreadsheetValidationService>();
 builder.Services.AddScoped<IDataValidator, DataValidator>();
 builder.Services.AddScoped<IFileProvider, FileProvider>();

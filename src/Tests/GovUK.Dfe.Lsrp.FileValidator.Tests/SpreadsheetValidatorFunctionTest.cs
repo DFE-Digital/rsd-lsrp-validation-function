@@ -16,10 +16,9 @@ public class SpreadsheetValidatorFunctionTest
         ISpreadsheetValidationService validationService = Substitute.For<ISpreadsheetValidationService>();
         validationService.ValidateAsync(Arg.Any<User>(), "test.xlsx", Arg.Any<List<string>>()).Returns(Task.FromResult(true));
 
-        IMessageParser messageParser = new MessageParser();
         IFileValidationResultService validationResultService = Substitute.For<IFileValidationResultService>();
         validationResultService.SendResultAsync(Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<IEnumerable<string>>()).Returns(Task.CompletedTask);
-        SpreadsheetValidatorFunction function = new(messageParser, validationService, validationResultService, NullLogger<SpreadsheetValidatorFunction>.Instance);
+        SpreadsheetValidatorFunction function = new(validationService, validationResultService, NullLogger<SpreadsheetValidatorFunction>.Instance);
         ServiceBusReceivedMessage message = CreateMessage("test.xlsx", "file-id-123");
         ServiceBusMessageActions messageActions = Substitute.For<ServiceBusMessageActions>();
 
@@ -34,9 +33,8 @@ public class SpreadsheetValidatorFunctionTest
     public async Task Run_WhenMessageIsNotValid_ThrowsInvalidDataException()
     {
         ISpreadsheetValidationService validationService = Substitute.For<ISpreadsheetValidationService>();
-        IMessageParser messageParser = new MessageParser();
         IFileValidationResultService validationResultService = Substitute.For<IFileValidationResultService>();
-        SpreadsheetValidatorFunction function = new(messageParser, validationService, validationResultService, NullLogger<SpreadsheetValidatorFunction>.Instance);
+        SpreadsheetValidatorFunction function = new(validationService, validationResultService, NullLogger<SpreadsheetValidatorFunction>.Instance);
         ServiceBusReceivedMessage message = CreateMessage(null, null);
         ServiceBusMessageActions messageActions = Substitute.For<ServiceBusMessageActions>();
 
@@ -56,13 +54,13 @@ public class SpreadsheetValidatorFunctionTest
                 Metadata = new Metadata
                 {
                     ApplicationId = "00000000-0000-0000-0000-000000000001",
-                    ApplicationReference = "APP-001",
-                    LocalAuthority = "LA1"
+                    ApplicationReference = "APP-001"
                 },
                 Payload = new Payload
                 {
                     FileUri = fileUri,
-                    FileId = fileId
+                    FileId = fileId,
+                    LocalAuthority = "{\"name\":\"LA-Name\",\"code\":\"LA-Code\"}"
                 }
             }
         };
@@ -76,9 +74,8 @@ public class SpreadsheetValidatorFunctionTest
     public async Task Run_WhenJsonRepresentsNull_ThrowsArgumentException()
     {
         ISpreadsheetValidationService validationService = Substitute.For<ISpreadsheetValidationService>();
-        IMessageParser messageParser = new MessageParser();
         IFileValidationResultService validationResultService = Substitute.For<IFileValidationResultService>();
-        SpreadsheetValidatorFunction function = new(messageParser, validationService, validationResultService, NullLogger<SpreadsheetValidatorFunction>.Instance);
+        SpreadsheetValidatorFunction function = new(validationService, validationResultService, NullLogger<SpreadsheetValidatorFunction>.Instance);
         ServiceBusReceivedMessage message = ServiceBusModelFactory.ServiceBusReceivedMessage(
             body: BinaryData.FromString(JsonSerializer.Serialize<object>(null)),
             messageId: Guid.Empty.ToString(),

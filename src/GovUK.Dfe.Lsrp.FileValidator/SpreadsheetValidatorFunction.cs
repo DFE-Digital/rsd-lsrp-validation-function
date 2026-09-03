@@ -8,7 +8,6 @@ using System.Text.Json;
 namespace GovUK.Dfe.Lsrp.FileValidator;
 
 public class SpreadsheetValidatorFunction(
-    IMessageParser messageParser, 
     ISpreadsheetValidationService validationService, 
     IFileValidationResultService validationResultService, 
     ILogger<SpreadsheetValidatorFunction> logger)
@@ -24,15 +23,15 @@ public class SpreadsheetValidatorFunction(
 
         FileUploadedMessage? fileMessage = JsonSerializer.Deserialize<FileUploadedMessage>(message.Body.ToString(), jsonOptions) ?? throw new ArgumentException("Message body is empty or not valid JSON.");
 
-        if (!messageParser.Parse(fileMessage)) throw new InvalidDataException("Message body not valid");
+        if (!MessageParser.Parse(fileMessage, out MessageData? messageData)) throw new InvalidDataException("Message body not valid");
 
-        User user = new() { LocalAuthority = messageParser.LocalAuthority! };
+        User user = new() { LocalAuthority = messageData!.LocalAuthority!.ToString() };
 
         List<string> errors = [];
-        bool isValid = await validationService.ValidateAsync(user, messageParser.FileUri!, errors);
-        logger.LogInformation("Spreadsheet validation {result} for message ID {messageId}. {errors}", isValid ? "succeeded" : "failed", messageParser.MessageId, string.Join(", ", errors));
+        bool isValid = await validationService.ValidateAsync(user, messageData.FileUri!, errors);
+        logger.LogInformation("Spreadsheet validation {result} for message ID {messageId}. {errors}", isValid ? "succeeded" : "failed", messageData.MessageId, string.Join(", ", errors));
 
-        await validationResultService.SendResultAsync(messageParser.FileId!, isValid, errors);
+        await validationResultService.SendResultAsync(messageData.FileId!, isValid, errors);
 
         await messageActions.CompleteMessageAsync(message);
     }
