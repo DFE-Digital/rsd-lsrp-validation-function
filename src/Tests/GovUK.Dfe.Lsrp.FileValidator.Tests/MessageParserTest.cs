@@ -40,4 +40,66 @@ public class MessageParserTest
         Assert.Equal(laName, messageData.LocalAuthority.Name);
         Assert.Equal($"{laCode} {laName}", messageData.LocalAuthority.ToString());
     }
+
+    [Fact]
+    public void Parse_WhenLocalAuthorityMissing_ReturnsFalse()
+    {
+        // Arrange
+        FileUploadedMessage message = new()
+        {
+            MessageId = "msg001",
+            Message = new Message
+            {
+                Metadata = new Metadata
+                {
+                    ApplicationId = "app001",
+                    ApplicationReference = "ref001",
+                },
+                Payload = new Payload
+                {
+                    FileUri = "https://example.com/file.csv",
+                    FileId = "file001",
+                    LocalAuthority = null
+                }
+            }
+        };
+
+        // Act
+        bool result = MessageParser.Parse(message, out MessageData? messageData);
+
+        // Assert
+        Assert.False(result);
+        Assert.Null(messageData);
+    }
+
+    [Fact]
+    public void Parse_WhenLocalAuthorityIsInvalidJson_ReturnsFalse()
+    {
+        // Arrange
+        FileUploadedMessage message = new()
+        {
+            MessageId = "msg001",
+            Message = new Message
+            {
+                Metadata = new Metadata
+                {
+                    ApplicationId = "app001",
+                    ApplicationReference = "ref001",
+                },
+                Payload = new Payload
+                {
+                    FileUri = "https://example.com/file.csv",
+                    FileId = "file001",
+                    LocalAuthority = "not-json"
+                }
+            }
+        };
+
+        // Act
+        bool result = MessageParser.Parse(message, out MessageData? messageData);
+
+        // Assert
+        Assert.False(result);
+        Assert.Null(messageData);
+    }
 }
