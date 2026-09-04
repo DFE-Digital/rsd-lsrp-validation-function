@@ -1,30 +1,58 @@
 ﻿using GovUK.Dfe.Lsrp.FileValidator.Models;
+using System.Text.Json;
 
 namespace GovUK.Dfe.Lsrp.FileValidator
 {
-    public class MessageParser : IMessageParser
+    public class MessageParser
     {
-        public string? FileUri { get; private set; }
-        public string? FileId { get; private set; }
-        public string? MessageId { get; private set; }
-        public string? ApplicationId { get; private set; }
-        public string? LocalAuthority { get; private set; }
+        private static readonly JsonSerializerOptions? jsonOptions = new() { PropertyNameCaseInsensitive = true };
 
-        public bool Parse(FileUploadedMessage fileMessage)
+        public static bool Parse(FileUploadedMessage fileMessage, out MessageData? messageData)
         {
-            if (!ValidateMessage(fileMessage)) return false;
+            if (!ValidateMessage(fileMessage, out LocalAuthority? localAuthority))
+            {
+                messageData = null;
+                return false;
+            }
 
-            FileUri = fileMessage.Message?.Payload?.FileUri;
-            FileId = fileMessage.Message?.Payload?.FileId;
-            MessageId = fileMessage.MessageId;
-            ApplicationId = fileMessage.Message?.Metadata?.ApplicationId;
-            LocalAuthority = fileMessage.Message?.Metadata?.LocalAuthority;
+            messageData = new MessageData
+            {
+                FileUri = fileMessage.Message?.Payload?.FileUri,
+                FileId = fileMessage.Message?.Payload?.FileId,
+                MessageId = fileMessage.MessageId,
+                ApplicationId = fileMessage.Message?.Metadata?.ApplicationId,
+                LocalAuthority = localAuthority
+            };
 
-            return fileMessage.Message != null && HasFile(fileMessage.Message) && HasApplication(fileMessage.Message);
+            return true;
         }
 
-        private static bool ValidateMessage(FileUploadedMessage fileMessage) => fileMessage.Message != null && HasFile(fileMessage.Message) && HasApplication(fileMessage.Message);
+        private static bool ValidateMessage(FileUploadedMessage fileMessage, out LocalAuthority? localAuthority)
+        {
+            localAuthority = null;
+            return fileMessage.Message != null && HasFile(fileMessage.Message) && HasApplication(fileMessage.Message) && HasLocalAuthority(fileMessage.Message, out localAuthority);
+        }
+
         private static bool HasFile(Message? message) => message != null && message.Payload != null && !string.IsNullOrEmpty(message.Payload.FileUri) && !string.IsNullOrEmpty(message.Payload.FileId);
         private static bool HasApplication(Message? message) => message != null && message.Metadata != null && !string.IsNullOrEmpty(message.Metadata.ApplicationId) && !string.IsNullOrEmpty(message.Metadata.ApplicationReference);
+        
+        private static bool HasLocalAuthority(Message? message, out LocalAuthority? localAuthority)
+        {
+            localAuthority = null;
+            if (message == null || message.Payload == null || string.IsNullOrEmpty(message.Payload.LocalAuthority))
+            {
+                return false;
+            }
+
+            try
+            {
+                localAuthority = JsonSerializer.Deserialize<LocalAuthority>(message.Payload.LocalAuthority, jsonOptions);
+                return true;
+            }
+            catch (JsonException)
+            {
+                return false;
+            }
+        }
     }
 }

@@ -34,6 +34,7 @@ public class Payload
 {
     public string? FileUri { get; set; }
     public string? FileId { get; set; }
+    public string? LocalAuthority { get; set; }
 }
 
 public class Metadata
@@ -41,7 +42,6 @@ public class Metadata
     public string? ApplicationId { get; set; }
     public string? ApplicationReference { get; set; }
     public string? TemplateId { get; set; }
-    public string? LocalAuthority { get; set; }
 }
 
 public class Headers
