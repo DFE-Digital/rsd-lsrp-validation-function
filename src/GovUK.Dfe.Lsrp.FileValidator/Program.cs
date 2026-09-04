@@ -3,7 +3,6 @@ using GovUK.Dfe.Lsrp.FileValidator.Models;
 using GovUK.Dfe.Lsrp.FileValidator.Services;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Azure.Functions.Worker.OpenTelemetry;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -11,18 +10,13 @@ var builder = FunctionsApplication.CreateBuilder(args);
 
 builder.ConfigureFunctionsWebApplication();
 
-builder.Configuration.AddJsonFile("appsettings.json");
-builder.Configuration.AddJsonFile("local.settings.json", optional: true);
-builder.Services.Configure<ValidationOptions>(builder.Configuration.GetSection("ValidationOptions"));
+var validationSection = builder.Configuration.GetSection("ValidationOptions");
+builder.Services.Configure<ValidationOptions>(validationSection);
 
 if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING")))
 {
-    builder.Services.AddOpenTelemetry()
-        .UseFunctionsWorkerDefaults()
-        .UseAzureMonitorExporter();
+    builder.Services.AddOpenTelemetry().UseFunctionsWorkerDefaults().UseAzureMonitorExporter();
 }
-
-builder.Configuration.AddUserSecrets<Program>(optional: true);
 
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<ISpreadsheetValidationService, SpreadsheetValidationService>();
