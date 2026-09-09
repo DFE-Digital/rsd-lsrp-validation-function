@@ -1,6 +1,7 @@
 ﻿using GovUK.Dfe.Lsrp.FileValidator.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Net;
 using System.Net.Http.Json;
 
 namespace GovUK.Dfe.Lsrp.FileValidator.Services;
@@ -53,9 +54,12 @@ public class FileValidationResultService : IFileValidationResultService
         };
 
         string? url = $"{FilesUrl}/{fileId}/validation-result";
+        logger.LogInformation("Sending validation result to {Url} for file {FileId}. IsValid: {IsValid}, Errors: {Errors}.", url, fileId, isValid, dto.Message);
         HttpResponseMessage response = await httpClient.PostAsJsonAsync(url, dto);
-        string responseContent = await response.Content.ReadAsStringAsync();
-        logger.LogError("Response Content: {responseContent}", responseContent);
-        response.EnsureSuccessStatusCode();
+        if (response.StatusCode != HttpStatusCode.OK)
+        {
+            string responseContent = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Failed to send validation result. Status code: {response.StatusCode}, Response: {responseContent}");
+        }
     }
 }
