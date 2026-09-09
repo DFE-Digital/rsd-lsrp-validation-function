@@ -7,7 +7,8 @@ namespace GovUK.Dfe.Lsrp.FileValidator.Tests;
 
 public class FileValidationResultServiceTest(ITestOutputHelper output)
 {
-    [Fact(Skip = "Integration test requiring file ID")]
+    [Fact(Skip = "Requires real file ID")]
+    [Trait("Category", "Integration")]
     public async Task SendResultAsync_ShouldCompleteSuccessfully()
     {
         // Arrange
@@ -25,5 +26,37 @@ public class FileValidationResultServiceTest(ITestOutputHelper output)
 
         // Assert
         // No exception means the test passes
+    }
+
+    [Fact]
+    public async Task SendResultAsync_ShouldThrowArgumentException_WhenFileIdIsEmpty()
+    {
+        // Arrange
+        var httpClientFactory = Substitute.For<IHttpClientFactory>();
+        IConfiguration configuration = TestConfig.GetConfiguration();
+        var logger = new FakeLogger(output);
+        var service = new FileValidationResultService(httpClientFactory, configuration, logger);
+        var errors = new List<string> { "Test error message" };
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentException>(() => service.SendResultAsync(string.Empty, false, errors));
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task SendResultAsync_ShouldHandleErrorResponse()
+    {
+        // Arrange
+        var httpClient = new HttpClient();
+        var httpClientFactory = Substitute.For<IHttpClientFactory>();
+        httpClientFactory.CreateClient().Returns(httpClient);
+        IConfiguration configuration = TestConfig.GetConfiguration();
+        var logger = new FakeLogger(output);
+        var service = new FileValidationResultService(httpClientFactory, configuration, logger);
+        var errors = new List<string> { "Test error message", "Another test error message" };
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<HttpRequestException>(() => service.SendResultAsync("test", false, errors));
+        output.WriteLine($"Caught expected HttpRequestException: {exception.Message}");
     }
 }
