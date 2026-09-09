@@ -5,10 +5,10 @@ using Xunit.Abstractions;
 
 namespace GovUK.Dfe.Lsrp.FileValidator.Tests;
 
-[Trait("Category", "Integration")]
 public class FileValidationResultServiceTest(ITestOutputHelper output)
 {
     [Fact(Skip = "Requires real file ID")]
+    [Trait("Category", "Integration")]
     public async Task SendResultAsync_ShouldCompleteSuccessfully()
     {
         // Arrange
@@ -43,6 +43,7 @@ public class FileValidationResultServiceTest(ITestOutputHelper output)
     }
 
     [Fact]
+    [Trait("Category", "Integration")]
     public async Task SendResultAsync_ShouldHandleErrorResponse()
     {
         // Arrange
