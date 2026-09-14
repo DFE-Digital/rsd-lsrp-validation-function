@@ -7,9 +7,9 @@ namespace GovUK.Dfe.Lsrp.FileValidator
     {
         private static readonly JsonSerializerOptions? jsonOptions = new() { PropertyNameCaseInsensitive = true };
 
-        public static bool Parse(FileUploadedMessage fileMessage, out MessageData? messageData)
+        public static bool Parse(FileUploadedMessage fileMessage, out MessageData? messageData, List<string> errors)
         {
-            if (!ValidateMessage(fileMessage, out LocalAuthority? localAuthority))
+            if (!ValidateMessage(fileMessage, out LocalAuthority? localAuthority, errors))
             {
                 messageData = null;
                 return false;
@@ -27,10 +27,36 @@ namespace GovUK.Dfe.Lsrp.FileValidator
             return true;
         }
 
-        private static bool ValidateMessage(FileUploadedMessage fileMessage, out LocalAuthority? localAuthority)
+        private static bool ValidateMessage(FileUploadedMessage fileMessage, out LocalAuthority? localAuthority, List<string> errors)
         {
             localAuthority = null;
-            return fileMessage.Message != null && HasFile(fileMessage.Message) && HasApplication(fileMessage.Message) && HasLocalAuthority(fileMessage.Message, out localAuthority);
+            var isValid = true;
+
+            if (fileMessage.Message == null)
+            {
+                errors.Add("Message is null.");
+                return false;
+            }
+
+            if (!HasFile(fileMessage.Message))
+            {
+                errors.Add("File information is missing or incomplete.");
+                isValid = false;
+            }
+
+            if (!HasApplication(fileMessage.Message))
+            {
+                errors.Add("Application information is missing or incomplete.");
+                isValid = false;
+            }
+
+            if (!HasLocalAuthority(fileMessage.Message, out localAuthority))
+            {
+                errors.Add("Local authority is missing or invalid.");
+                isValid = false;
+            }
+
+            return isValid;
         }
 
         private static bool HasFile(Message? message) => message != null && message.Payload != null && !string.IsNullOrEmpty(message.Payload.FileUri) && !string.IsNullOrEmpty(message.Payload.FileId);

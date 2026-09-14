@@ -21,11 +21,15 @@ public class SpreadsheetValidatorFunction(
 
         FileUploadedMessage? fileMessage = JsonSerializer.Deserialize<FileUploadedMessage>(message.Body.ToString(), jsonOptions) ?? throw new ArgumentException("Message body is empty or not valid JSON.");
 
-        if (!MessageParser.Parse(fileMessage, out MessageData? messageData)) throw new InvalidDataException("Message body not valid");
+        List<string> errors = [];
+
+        if (!MessageParser.Parse(fileMessage, out MessageData? messageData, errors))
+        {
+            throw new InvalidDataException($"Message body not valid: {string.Join(", ", errors)}");
+        }
 
         User user = new() { LocalAuthority = messageData!.LocalAuthority!.ToString() };
 
-        List<string> errors = [];
         bool isValid = await validationService.ValidateAsync(user, messageData.FileUri!, errors);
         logger.LogInformation("Spreadsheet validation {result} for message ID {messageId}. {errors}", isValid ? "succeeded" : "failed", messageData.MessageId, string.Join(", ", errors));
 

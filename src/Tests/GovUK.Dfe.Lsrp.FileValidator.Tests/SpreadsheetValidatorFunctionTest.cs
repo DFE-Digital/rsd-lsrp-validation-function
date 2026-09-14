@@ -77,12 +77,11 @@ public class SpreadsheetValidatorFunctionTest
         IFileValidationResultService validationResultService = Substitute.For<IFileValidationResultService>();
         SpreadsheetValidatorFunction function = new(validationService, validationResultService, NullLogger<SpreadsheetValidatorFunction>.Instance);
         ServiceBusReceivedMessage message = ServiceBusModelFactory.ServiceBusReceivedMessage(
-            body: BinaryData.FromString(JsonSerializer.Serialize<object>(null)),
             messageId: Guid.Empty.ToString(),
             contentType: "application/json");
         ServiceBusMessageActions messageActions = Substitute.For<ServiceBusMessageActions>();
 
-        await Assert.ThrowsAsync<ArgumentException>(() => function.Run(message, messageActions));
+        await Assert.ThrowsAsync<JsonException>(() => function.Run(message, messageActions));
 
         await validationService.DidNotReceive().ValidateAsync(Arg.Any<User>(), "test.xlsx", Arg.Any<List<string>>());
         await validationResultService.DidNotReceive().SendResultAsync(Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<IEnumerable<string>>());

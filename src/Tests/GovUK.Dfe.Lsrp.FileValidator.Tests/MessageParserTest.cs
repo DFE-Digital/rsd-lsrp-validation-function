@@ -1,8 +1,9 @@
 ﻿using GovUK.Dfe.Lsrp.FileValidator.Models;
+using Xunit.Abstractions;
 
 namespace GovUK.Dfe.Lsrp.FileValidator.Tests;
 
-public class MessageParserTest
+public class MessageParserTest(ITestOutputHelper output)
 {
     [Fact]
     public void Parse_Valid_Message()
@@ -31,9 +32,12 @@ public class MessageParserTest
         };
 
         // Act
-        MessageParser.Parse(message, out MessageData? messageData);
+        List<string> errors = [];
+        bool result = MessageParser.Parse(message, out MessageData? messageData, errors);
 
         // Assert
+        Assert.True(result);
+        Assert.Empty(errors);
         Assert.NotNull(messageData);
         Assert.NotNull(messageData.LocalAuthority);
         Assert.Equal(laCode, messageData.LocalAuthority.Code);
@@ -65,11 +69,14 @@ public class MessageParserTest
         };
 
         // Act
-        bool result = MessageParser.Parse(message, out MessageData? messageData);
+        List<string> errors = [];
+        bool result = MessageParser.Parse(message, out MessageData? messageData, errors);
 
         // Assert
         Assert.False(result);
         Assert.Null(messageData);
+        output.WriteLine($"Errors: {string.Join(", ", errors)}");
+        Assert.Contains("Local authority is missing or invalid.", errors);
     }
 
     [Fact]
@@ -96,10 +103,56 @@ public class MessageParserTest
         };
 
         // Act
-        bool result = MessageParser.Parse(message, out MessageData? messageData);
+        List<string> errors = [];
+        bool result = MessageParser.Parse(message, out MessageData? messageData, errors);
 
         // Assert
         Assert.False(result);
         Assert.Null(messageData);
+        output.WriteLine($"Errors: {string.Join(", ", errors)}");
+        Assert.Contains("Local authority is missing or invalid.", errors);
+    }
+
+    [Fact]
+    public void Parse_InvalidMessage_ReturnsFalse()
+    {
+        // Arrange
+        FileUploadedMessage message = new()
+        {
+            MessageId = "msg001",
+            Message = new Message()
+        };
+
+        // Act
+        List<string> errors = [];
+        bool result = MessageParser.Parse(message, out MessageData? messageData, errors);
+
+        // Assert
+        Assert.False(result);
+        Assert.Null(messageData);
+        output.WriteLine($"Errors: {string.Join(", ", errors)}");
+        Assert.Contains("File information is missing or incomplete.", errors);
+        Assert.Contains("Application information is missing or incomplete.", errors);
+        Assert.Contains("Local authority is missing or invalid.", errors);
+    }
+
+    [Fact]
+    public void Parse_NoMessage_ReturnsFalse()
+    {
+        // Arrange
+        FileUploadedMessage message = new()
+        {
+            MessageId = "msg001"
+        };
+
+        // Act
+        List<string> errors = [];
+        bool result = MessageParser.Parse(message, out MessageData? messageData, errors);
+
+        // Assert
+        Assert.False(result);
+        Assert.Null(messageData);
+        output.WriteLine($"Errors: {string.Join(", ", errors)}");
+        Assert.Contains("Message is null.", errors);
     }
 }
