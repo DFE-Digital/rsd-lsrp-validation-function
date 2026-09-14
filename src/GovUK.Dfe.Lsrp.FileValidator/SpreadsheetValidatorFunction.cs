@@ -25,8 +25,7 @@ public class SpreadsheetValidatorFunction(
 
         if (!MessageParser.Parse(fileMessage, out MessageData? messageData, errors))
         {
-            string errorMessage = $"Message body not valid: {string.Join(", ", errors)}";
-            throw new InvalidDataException(errorMessage);
+            throw new InvalidDataException($"Message body not valid: {string.Join(", ", errors)}");
         }
 
         User user = new() { LocalAuthority = messageData!.LocalAuthority!.ToString() };
