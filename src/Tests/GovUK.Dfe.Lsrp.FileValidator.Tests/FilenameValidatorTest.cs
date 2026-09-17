@@ -1,30 +1,27 @@
 ﻿using GovUK.Dfe.Lsrp.FileValidator.Models;
 using GovUK.Dfe.Lsrp.FileValidator.Services;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
-using System.Text.RegularExpressions;
 using Xunit.Abstractions;
 
 namespace GovUK.Dfe.Lsrp.FileValidator.Tests;
 
 public class FilenameValidatorTest(ITestOutputHelper output)
 {
-    [Theory]
-    [InlineData("lsrp-quarterly-return-September-2026-301-barking-and-dagenham.xlsx", true)]
-    [InlineData("lsrp-quarterly-return-September-2026-839-bournemouth-christchurch-and-poole.xlsx", true)]
-    public async Task ValidateFilename_ShouldReturnExpectedResultAsync(string filename, bool expectedResult)
+    [Fact]
+    public async Task ValidateFilename_ShouldReturnExpectedResultAsync()
     {
+        // Arrange
+        var filename = "lsrp-quarterly-return-September-2026-301-barking-and-dagenham.xlsx";
+
         // Act
         IConfiguration configuration = CreateConfiguration();
-        var localAuthorityProvider = Substitute.For<ILocalAuthorityProvider>();
-        localAuthorityProvider.GetLocalAuthorityAsync("301").Returns(new LocalAuthority { Code = "301", Name = "Barking and Dagenham" });
-        localAuthorityProvider.GetLocalAuthorityAsync("839").Returns(new LocalAuthority { Code = "839", Name = "Bournemouth, Christchurch and Poole" });
-        var validator = new FilenameValidator(configuration, localAuthorityProvider, new TestLogger<FilenameValidator>(output));
-        bool result = await validator.ValidateFilenameAsync(filename);
+        var validator = new FilenameValidator(configuration, new TestLogger<FilenameValidator>(output));
+        List<string> errors = [];
+        bool result = await validator.ValidateFilenameAsync(filename, new LocalAuthority { Code = "301", Name = "Barking and Dagenham" }, errors);
 
         // Assert
-        Assert.Equal(expectedResult, result);
+        Assert.True(result);
+        Assert.Empty(errors);
     }
 
     [Fact]
@@ -35,28 +32,32 @@ public class FilenameValidatorTest(ITestOutputHelper output)
 
         // Act
         IConfiguration configuration = CreateConfiguration();
-        var localAuthorityProvider = Substitute.For<ILocalAuthorityProvider>();
-        var validator = new FilenameValidator(configuration, localAuthorityProvider, new TestLogger<FilenameValidator>(output));
-        var result = await validator.ValidateFilenameAsync(filename);
+        var validator = new FilenameValidator(configuration, new TestLogger<FilenameValidator>(output));
+        List<string> errors = [];
+        var result = await validator.ValidateFilenameAsync(filename, new LocalAuthority { Code = "301", Name = "Barking and Dagenham" }, errors);
 
         // Assert
         Assert.False(result);
+        Assert.NotEmpty(errors);
+        output.WriteLine($"Errors: {string.Join(", ", errors)}");
     }
 
     [Fact]
-    public async Task ValidateFilename_ShouldReturnFalseForInvalidLocalAuthorityAsync()
+    public async Task ValidateFilename_ShouldReturnFalseForNonMatchingLocalAuthorityAsync()
     {
         // Arrange
         var filename = "lsrp-quarterly-return-September-2026-999-invalid-local-authority.xlsx";
 
         // Act
         IConfiguration configuration = CreateConfiguration();
-        var localAuthorityProvider = Substitute.For<ILocalAuthorityProvider>();
-        var validator = new FilenameValidator(configuration, localAuthorityProvider, new TestLogger<FilenameValidator>(output));
-        var result = await validator.ValidateFilenameAsync(filename);
+        var validator = new FilenameValidator(configuration, new TestLogger<FilenameValidator>(output));
+        List<string> errors = [];
+        var result = await validator.ValidateFilenameAsync(filename, new LocalAuthority { Code = "301", Name = "Barking and Dagenham" }, errors);
 
         // Assert
         Assert.False(result);
+        Assert.NotEmpty(errors);
+        output.WriteLine($"Errors: {string.Join(", ", errors)}");
     }
 
     private static IConfiguration CreateConfiguration()
@@ -68,53 +69,3 @@ public class FilenameValidatorTest(ITestOutputHelper output)
             .Build();
 }
 
-// TODO move this to main app
-public class FilenameValidator(IConfiguration configuration, ILocalAuthorityProvider localAuthorityProvider, ILogger<FilenameValidator> logger)
-{
-    public async Task<bool> ValidateFilenameAsync(string filename)
-    {
-        string pattern = @"^lsrp-quarterly-return-[A-Za-z]+-\d{4}-\d{3}-[a-z-]+\.xlsx$";
-        bool result = Regex.IsMatch(filename, pattern);
-        if (!result)
-        {
-            logger.LogWarning("Filename does not match the expected pattern.");
-            return false;
-        }
-
-        FilenameComponents components = GetFilenameComponents(filename);
-        var expectedVersion = configuration["SpreadsheetVersion"];
-        var actualVersion = $"{components.Month}-{components.Year}";
-        if (expectedVersion != actualVersion)
-        {
-            logger.LogWarning("Spreadsheet version does not match the expected version. Expected: {expectedVersion}, Actual: {actualVersion}", expectedVersion, actualVersion);
-            return false;
-        }
-
-        var localAuthority = await localAuthorityProvider.GetLocalAuthorityAsync(components.LaCode);
-        if (localAuthority == null)
-        {
-            logger.LogWarning("Local authority code {laCode} ({laName}) is not valid.", components.LaCode, components.LaName);
-            return false;
-        }
-
-        // TODO check LA code against that from message body (if available) and log a warning if they don't match
-
-        return true;
-    }
-
-    private FilenameComponents GetFilenameComponents(string filename)
-    {
-        string[] parts = filename.Split('-');
-        string month = parts[3];
-        string year = parts[4];
-        string laCode = parts[5];
-
-        int index = filename.IndexOf(laCode) + laCode.Length + 1;
-        string laName = filename[index..].Replace(".xlsx", "");
-
-        logger.LogInformation("Extracted month: {month}, year: {year}, local authority code: {laCode}, local authority name: {laName} from filename.", month, year, laCode, laName);
-        return new FilenameComponents(month, year, laCode, laName);
-    }
-
-    private record FilenameComponents(string Month, string Year, string LaCode, string LaName);
-}
