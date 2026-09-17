@@ -1,17 +1,19 @@
 ﻿using GovUK.Dfe.Lsrp.FileValidator.Models;
+using GovUK.Dfe.Lsrp.FileValidator.Services;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
-using Microsoft.VisualBasic.FileIO;
+using Microsoft.Extensions.Options;
 using NSubstitute;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Text.Json;
+using Xunit.Abstractions;
 
 namespace GovUK.Dfe.Lsrp.FileValidator.Tests;
 
-public class LocalAuthorityProviderTest
+public class LocalAuthorityProviderTest(ITestOutputHelper output)
 {
     private static readonly string? apiKey;
+    private static readonly MemoryDistributedCache distributedCache;
+    private static readonly HttpClient httpClient;
 
     static LocalAuthorityProviderTest()
     {
@@ -21,101 +23,53 @@ public class LocalAuthorityProviderTest
             .Build();
         apiKey = configuration["LocalAuthorityProvider:ApiKey"];
         if (string.IsNullOrWhiteSpace(apiKey)) throw new InvalidOperationException("Set 'LocalAuthorityProvider:ApiKey' in user secrets or environment variables.");
+
+        httpClient = new HttpClient()
+        {
+            BaseAddress = new Uri("https://api.dev.academies.education.gov.uk/v4/")
+        };
+        httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+        httpClient.DefaultRequestHeaders.Add("ApiKey", apiKey);
+
+        distributedCache = new MemoryDistributedCache(new OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
     }
 
-    [Category("Integration")]
+    [Trait("Category", "Integration")]
     [Theory]
     [InlineData("301", "Barking and Dagenham")]
     [InlineData("839", "Bournemouth, Christchurch and Poole")]
     [InlineData("816", "York")]
-    public void GetLocalAuthority_ShouldReturnCorrectLocalAuthority(string localAuthorityCode, string expectedName)
+    public async Task GetLocalAuthority_ShouldReturnCorrectLocalAuthorityAsync(string localAuthorityCode, string localAuthorityName)
     {
         // Arrange
         IHttpClientFactory httpClientFactory = Substitute.For<IHttpClientFactory>();
-        HttpClient httpClient = new()
-        {
-            BaseAddress = new Uri("https://api.dev.academies.education.gov.uk/v4/local-authorities")
-        };
-        httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-        httpClient.DefaultRequestHeaders.Add("ApiKey", apiKey);
-        httpClientFactory.CreateClient("LocalAuthorities").Returns(httpClient);
-        IDistributedCache distributedCache = Substitute.For<IDistributedCache>();
-        var provider = new LocalAuthorityProvider(httpClientFactory, distributedCache);
+        httpClientFactory.CreateClient(LocalAuthorityProvider.LocalAuthoritiesKey).Returns(httpClient);
+        TestLogger<LocalAuthorityProvider> logger = new(output);
+        LocalAuthorityProvider provider = new(httpClientFactory, distributedCache, logger);
 
         // Act
-        var result = provider.GetLocalAuthority(localAuthorityCode);
+        LocalAuthority? result = await provider.GetLocalAuthorityAsync(localAuthorityCode);
 
         // Assert
-        Assert.Equal(expectedName, result?.Name);
+        Assert.NotNull(result);
+        Assert.Equal(localAuthorityCode, result.Code);
+        Assert.Equal(localAuthorityName, result.Name);
     }
-}
 
-public class LocalAuthorityProvider(IHttpClientFactory httpClientFactory, IDistributedCache distributedCache)
-{
-    private const string LocalAuthoritiesCacheKey = "LocalAuthorities";
-    private readonly JsonSerializerOptions? jsonOptions = new() { PropertyNameCaseInsensitive = true };
-
-    public LocalAuthority? GetLocalAuthority(string localAuthorityCode)
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task GetLocalAuthority_ShouldReturnNullForInvalidCodeAsync()
     {
-        string? cachedJson = distributedCache.GetString(LocalAuthoritiesCacheKey);
-        IEnumerable<LocalAuthority>? localAuthorities = null;
-        if (!string.IsNullOrWhiteSpace(cachedJson))
-        {
-            Debug.WriteLine("Using cached local authorities.");
-        }
-        else
-        {
-            Debug.WriteLine("Fetching local authorities from API...");
-            HttpClient httpClient = httpClientFactory.CreateClient(LocalAuthoritiesCacheKey);
-            cachedJson = httpClient.GetStringAsync("").Result;
-            distributedCache.SetString(LocalAuthoritiesCacheKey, cachedJson);
-        }
-        localAuthorities = JsonSerializer.Deserialize<IEnumerable<LocalAuthority>>(cachedJson, jsonOptions);
+        // Arrange
+        IHttpClientFactory httpClientFactory = Substitute.For<IHttpClientFactory>();
+        httpClientFactory.CreateClient(LocalAuthorityProvider.LocalAuthoritiesKey).Returns(httpClient);
+        TestLogger<LocalAuthorityProvider> logger = new(output);
+        LocalAuthorityProvider provider = new(httpClientFactory, distributedCache, logger);
 
-        return localAuthorities!.SingleOrDefault(la => la.Code == localAuthorityCode);
+        // Act
+        LocalAuthority? result = await provider.GetLocalAuthorityAsync("9999");
+
+        // Assert
+        Assert.Null(result);
     }
-}
-
-public sealed class LocalAuthorityExtended
-{
-    public string? Title { get; set; }
-    public string? Region { get; set; }
-    public string? URN { get; set; }
-    public string? TypeOfCouncil { get; set; }
-    public string? PoliticalControl { get; set; }
-    public string? DAUCode { get; set; }
-}
-
-public static class LocalAuthorityCsvReader
-{
-    public static List<LocalAuthorityExtended> Read(string csvPath)
-    {
-        List<LocalAuthorityExtended> result = [];
-
-        using TextFieldParser parser = new(csvPath);
-        parser.SetDelimiters(",");
-        parser.HasFieldsEnclosedInQuotes = true;
-
-        _ = parser.ReadFields(); // header row
-
-        while (!parser.EndOfData)
-        {
-            string[]? row = parser.ReadFields();
-            if (row is null || row.Length == 0) continue;
-
-            result.Add(new LocalAuthorityExtended
-            {
-                Title = Get(row, 0),
-                Region = Get(row, 1),
-                URN = Get(row, 2),
-                TypeOfCouncil = Get(row, 3),
-                PoliticalControl = Get(row, 4),
-                DAUCode = Get(row, 5)
-            });
-        }
-
-        return result;
-    }
-
-    private static string? Get(string[] row, int index) => index < row.Length && !string.IsNullOrWhiteSpace(row[index]) ? row[index] : null;
 }

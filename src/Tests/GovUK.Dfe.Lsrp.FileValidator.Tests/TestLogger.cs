@@ -1,10 +1,9 @@
-﻿using GovUK.Dfe.Lsrp.FileValidator.Services;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 
 namespace GovUK.Dfe.Lsrp.FileValidator.Tests;
 
-public class FakeLogger(ITestOutputHelper output) : ILogger<FileValidationResultService>
+public class TestLogger<T>(ITestOutputHelper output) : ILogger<T>
 {
     public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
 
