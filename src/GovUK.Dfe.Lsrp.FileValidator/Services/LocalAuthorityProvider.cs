@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace GovUK.Dfe.Lsrp.FileValidator.Services;
 
-public class LocalAuthorityProvider(IHttpClientFactory httpClientFactory, IDistributedCache distributedCache, ILogger<LocalAuthorityProvider> logger)
+public class LocalAuthorityProvider(IHttpClientFactory httpClientFactory, IDistributedCache distributedCache, ILogger<LocalAuthorityProvider> logger) : ILocalAuthorityProvider
 {
     public const string LocalAuthoritiesKey = "LocalAuthorities";
     private readonly JsonSerializerOptions? jsonOptions = new() { PropertyNameCaseInsensitive = true };

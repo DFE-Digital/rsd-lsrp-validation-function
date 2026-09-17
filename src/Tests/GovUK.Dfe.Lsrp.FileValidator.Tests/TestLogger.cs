@@ -11,6 +11,6 @@ public class TestLogger<T>(ITestOutputHelper output) : ILogger<T>
 
     public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {
-        output.WriteLine(formatter(state, exception));
+        output.WriteLine($"[{logLevel}] {formatter(state, exception)}");
     }
 }
