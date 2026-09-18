@@ -45,7 +45,7 @@ public class FilenameValidator(IConfiguration configuration, ILogger<FilenameVal
         string year = parts[4];
         string laCode = parts[5];
 
-        int index = filename.IndexOf(laCode) + laCode.Length + 1;
+        int index = filename.LastIndexOf($"{laCode}-", StringComparison.Ordinal) + laCode.Length + 1;
         string laName = filename[index..].Replace(".xlsx", "");
 
         logger.LogInformation("Extracted month: {month}, year: {year}, local authority code: {laCode}, local authority name: {laName} from filename.", month, year, laCode, laName);
