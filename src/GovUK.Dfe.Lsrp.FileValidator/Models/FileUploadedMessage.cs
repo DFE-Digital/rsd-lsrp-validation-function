@@ -34,6 +34,7 @@ public class Payload
 {
     public string? FileUri { get; set; }
     public string? FileId { get; set; }
+    public string? FileName { get; set; }
     public string? LocalAuthority { get; set; }
 }
 

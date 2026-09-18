@@ -1,8 +1,6 @@
-﻿using GovUK.Dfe.Lsrp.FileValidator.Models;
-
-namespace GovUK.Dfe.Lsrp.FileValidator.Services;
+﻿namespace GovUK.Dfe.Lsrp.FileValidator.Services;
 
 public interface ISpreadsheetValidationService
 {
-    Task<bool> ValidateAsync(User user, string fileUri, List<string> errors);
+    Task<bool> ValidateAsync(MessageData messageData, List<string> errors);
 }

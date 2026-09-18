@@ -19,6 +19,7 @@ namespace GovUK.Dfe.Lsrp.FileValidator
             {
                 FileUri = fileMessage.Message?.Payload?.FileUri,
                 FileId = fileMessage.Message?.Payload?.FileId,
+                FileName = fileMessage.Message?.Payload?.FileName,
                 MessageId = fileMessage.MessageId,
                 ApplicationId = fileMessage.Message?.Metadata?.ApplicationId,
                 LocalAuthority = localAuthority
@@ -59,7 +60,8 @@ namespace GovUK.Dfe.Lsrp.FileValidator
             return isValid;
         }
 
-        private static bool HasFile(Message? message) => message != null && message.Payload != null && !string.IsNullOrEmpty(message.Payload.FileUri) && !string.IsNullOrEmpty(message.Payload.FileId);
+        private static bool HasFile(Message? message) => message != null && message.Payload != null && !string.IsNullOrEmpty(message.Payload.FileUri) && !string.IsNullOrEmpty(message.Payload.FileId) && !string.IsNullOrEmpty(message.Payload.FileName);
+
         private static bool HasApplication(Message? message) => message != null && message.Metadata != null && !string.IsNullOrEmpty(message.Metadata.ApplicationId) && !string.IsNullOrEmpty(message.Metadata.ApplicationReference);
         
         private static bool HasLocalAuthority(Message? message, out LocalAuthority? localAuthority)

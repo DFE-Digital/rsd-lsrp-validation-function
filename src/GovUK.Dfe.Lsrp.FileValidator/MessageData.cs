@@ -4,6 +4,7 @@ namespace GovUK.Dfe.Lsrp.FileValidator
 {
     public class MessageData
     {
+        public string? FileName { get; set; }
         public string? FileUri { get; set; }
         public string? FileId { get; set; }
         public string? MessageId { get; set; }

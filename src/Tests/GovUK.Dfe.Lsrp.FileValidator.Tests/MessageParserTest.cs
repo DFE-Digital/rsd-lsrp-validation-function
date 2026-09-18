@@ -26,6 +26,7 @@ public class MessageParserTest(ITestOutputHelper output)
                 {
                     FileUri = "https://example.com/file.csv",
                     FileId = "file001",
+                    FileName = "file.xlsx",
                     LocalAuthority = $"{{\"name\":\"{laName}\",\"code\":\"{laCode}\"}}"
                 }
             }
