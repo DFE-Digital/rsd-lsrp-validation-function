@@ -24,5 +24,6 @@ builder.Services.AddScoped<IDataValidator, DataValidator>();
 builder.Services.AddScoped<IFileProvider, FileProvider>();
 builder.Services.AddScoped<ISpreadsheetDataProvider, SpreadsheetDataProvider>();
 builder.Services.AddScoped<IFileValidationResultService, FileValidationResultService>();
+builder.Services.AddScoped<IFilenameValidator, FilenameValidator>();
 
 builder.Build().Run();

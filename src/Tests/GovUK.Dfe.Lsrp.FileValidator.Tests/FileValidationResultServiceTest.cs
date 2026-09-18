@@ -16,7 +16,7 @@ public class FileValidationResultServiceTest(ITestOutputHelper output)
         var httpClientFactory = Substitute.For<IHttpClientFactory>();
         httpClientFactory.CreateClient().Returns(httpClient);
         IConfiguration configuration = TestConfig.GetConfiguration();
-        var logger = new FakeLogger(output);
+        var logger = new TestLogger<FileValidationResultService>(output);
         var service = new FileValidationResultService(httpClientFactory, configuration, logger);
         var fileId = "test-application-id";
         var errors = new List<string> { "Test error message", "Another test error message" };
@@ -34,7 +34,7 @@ public class FileValidationResultServiceTest(ITestOutputHelper output)
         // Arrange
         var httpClientFactory = Substitute.For<IHttpClientFactory>();
         IConfiguration configuration = TestConfig.GetConfiguration();
-        var logger = new FakeLogger(output);
+        var logger = new TestLogger<FileValidationResultService>(output);
         var service = new FileValidationResultService(httpClientFactory, configuration, logger);
         var errors = new List<string> { "Test error message" };
 
@@ -51,7 +51,7 @@ public class FileValidationResultServiceTest(ITestOutputHelper output)
         var httpClientFactory = Substitute.For<IHttpClientFactory>();
         httpClientFactory.CreateClient().Returns(httpClient);
         IConfiguration configuration = TestConfig.GetConfiguration();
-        var logger = new FakeLogger(output);
+        var logger = new TestLogger<FileValidationResultService>(output);
         var service = new FileValidationResultService(httpClientFactory, configuration, logger);
         var errors = new List<string> { "Test error message", "Another test error message" };
 

@@ -28,9 +28,7 @@ public class SpreadsheetValidatorFunction(
             throw new InvalidDataException($"Message body not valid: {string.Join(", ", errors)}");
         }
 
-        User user = new() { LocalAuthority = messageData!.LocalAuthority!.ToString() };
-
-        bool isValid = await validationService.ValidateAsync(user, messageData.FileUri!, errors);
+        bool isValid = await validationService.ValidateAsync(messageData!, errors);
         logger.LogInformation("Spreadsheet validation {result} for message ID {messageId}. {errors}", isValid ? "succeeded" : "failed", messageData.MessageId, string.Join(", ", errors));
 
         await validationResultService.SendResultAsync(messageData.FileId!, isValid, errors);

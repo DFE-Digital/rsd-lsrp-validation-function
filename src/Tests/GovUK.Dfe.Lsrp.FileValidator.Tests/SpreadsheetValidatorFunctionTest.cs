@@ -14,7 +14,7 @@ public class SpreadsheetValidatorFunctionTest
     public async Task Run_WhenMessageIsValid_CallsValidationAndCompletesMessage()
     {
         ISpreadsheetValidationService validationService = Substitute.For<ISpreadsheetValidationService>();
-        validationService.ValidateAsync(Arg.Any<User>(), "test.xlsx", Arg.Any<List<string>>()).Returns(Task.FromResult(true));
+        validationService.ValidateAsync(Arg.Any<MessageData>(), Arg.Any<List<string>>()).Returns(Task.FromResult(true));
 
         IFileValidationResultService validationResultService = Substitute.For<IFileValidationResultService>();
         validationResultService.SendResultAsync(Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<IEnumerable<string>>()).Returns(Task.CompletedTask);
@@ -24,7 +24,7 @@ public class SpreadsheetValidatorFunctionTest
 
         await function.Run(message, messageActions);
 
-        await validationService.Received(1).ValidateAsync(Arg.Any<User>(), "test.xlsx", Arg.Any<List<string>>());
+        await validationService.Received(1).ValidateAsync(Arg.Any<MessageData>(), Arg.Any<List<string>>());
         await validationResultService.Received(1).SendResultAsync(Arg.Any<string>(), true, Arg.Any<IEnumerable<string>>());
         await messageActions.Received(1).CompleteMessageAsync(message, Arg.Any<CancellationToken>());
     }
@@ -40,7 +40,7 @@ public class SpreadsheetValidatorFunctionTest
 
         await Assert.ThrowsAsync<InvalidDataException>(() => function.Run(message, messageActions));
 
-        await validationService.DidNotReceive().ValidateAsync(Arg.Any<User>(), "test.xlsx", Arg.Any<List<string>>());
+        await validationService.DidNotReceive().ValidateAsync(Arg.Any<MessageData>(), Arg.Any<List<string>>());
         await validationResultService.DidNotReceive().SendResultAsync(Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<IEnumerable<string>>());
         await messageActions.DidNotReceive().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
     }
@@ -60,6 +60,7 @@ public class SpreadsheetValidatorFunctionTest
                 {
                     FileUri = fileUri,
                     FileId = fileId,
+                    FileName = "file.xlsx",
                     LocalAuthority = "{\"name\":\"LA-Name\",\"code\":\"LA-Code\"}"
                 }
             }
@@ -83,7 +84,7 @@ public class SpreadsheetValidatorFunctionTest
 
         await Assert.ThrowsAsync<JsonException>(() => function.Run(message, messageActions));
 
-        await validationService.DidNotReceive().ValidateAsync(Arg.Any<User>(), "test.xlsx", Arg.Any<List<string>>());
+        await validationService.DidNotReceive().ValidateAsync(Arg.Any<MessageData>(), Arg.Any<List<string>>());
         await validationResultService.DidNotReceive().SendResultAsync(Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<IEnumerable<string>>());
         await messageActions.DidNotReceive().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
     }
