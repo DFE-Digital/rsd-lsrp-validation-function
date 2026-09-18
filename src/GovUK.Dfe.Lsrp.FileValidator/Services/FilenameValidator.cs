@@ -21,7 +21,7 @@ public class FilenameValidator(IConfiguration configuration, ILogger<FilenameVal
         FilenameComponents components = GetFilenameComponents(filename);
         var expectedVersion = configuration["SpreadsheetVersion"];
         var actualVersion = $"{components.Month}-{components.Year}";
-        if (expectedVersion != actualVersion)
+        if (!string.Equals(expectedVersion, actualVersion, StringComparison.OrdinalIgnoreCase))
         {
             logger.LogWarning("Spreadsheet version does not match the expected version. Expected: {expectedVersion}, Actual: {actualVersion}", expectedVersion, actualVersion);
             errors.Add($"Spreadsheet version does not match the expected version. Expected: {expectedVersion}, Actual: {actualVersion}");
