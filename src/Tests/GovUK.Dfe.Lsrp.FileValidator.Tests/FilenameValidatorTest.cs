@@ -11,7 +11,7 @@ public class FilenameValidatorTest(ITestOutputHelper output)
     public async Task ValidateFilename_ShouldReturnExpectedResultAsync()
     {
         // Arrange
-        var filename = "lsrp-quarterly-return-September-2026-301-barking-and-dagenham.xlsx";
+        var filename = "lsrp-quarterly-return-september-2026-301-barking-and-dagenham.xlsx";
 
         // Act
         IConfiguration configuration = CreateConfiguration();
