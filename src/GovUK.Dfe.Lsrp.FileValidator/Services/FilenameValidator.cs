@@ -1,7 +1,6 @@
 ﻿using GovUK.Dfe.Lsrp.FileValidator.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using System.Text.RegularExpressions;
 
 namespace GovUK.Dfe.Lsrp.FileValidator.Services;
 
@@ -9,16 +8,30 @@ public class FilenameValidator(IConfiguration configuration, ILogger<FilenameVal
 {
     public async Task<bool> ValidateFilenameAsync(string filename, LocalAuthority localAuthority, List<string> errors)
     {
-        string pattern = @"^lsrp-quarterly-return-[A-Za-z]+-\d{4}-\d{3}-[a-z-]+\.xlsx$";
-        bool result = Regex.IsMatch(filename, pattern);
-        if (!result)
+        if (string.IsNullOrWhiteSpace(filename)) throw new ArgumentException("Filename cannot be null or whitespace.", nameof(filename));
+
+        if (!filename.StartsWith("lsrp-quarterly-return-", StringComparison.OrdinalIgnoreCase))
         {
-            logger.LogWarning("Filename does not match the expected pattern.");
-            errors.Add("Filename does not match the expected pattern.");
+            logger.LogWarning("Filename does not start with the expected prefix 'lsrp-quarterly-return-'.");
+            errors.Add("Filename does not start with the expected prefix 'lsrp-quarterly-return-'.");
             return false;
         }
 
-        FilenameComponents components = GetFilenameComponents(filename);
+        if (!filename.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+        {
+            logger.LogWarning("Filename does not have the expected .xlsx extension.");
+            errors.Add("Filename does not have the expected .xlsx extension.");
+            return false;
+        }
+
+        FilenameComponents? components = GetFilenameComponents(filename);
+        if (components == null)
+        {
+            logger.LogWarning("Filename does not have the expected format.");
+            errors.Add("Filename does not have the expected format.");
+            return false;
+        }
+
         var expectedVersion = configuration["SpreadsheetVersion"];
         var actualVersion = $"{components.Month}-{components.Year}";
         if (!string.Equals(expectedVersion, actualVersion, StringComparison.OrdinalIgnoreCase))
@@ -38,9 +51,11 @@ public class FilenameValidator(IConfiguration configuration, ILogger<FilenameVal
         return true;
     }
 
-    private FilenameComponents GetFilenameComponents(string filename)
+    private FilenameComponents? GetFilenameComponents(string filename)
     {
         string[] parts = filename.Split('-');
+        if (parts.Length < 6) return null;
+
         string month = parts[3];
         string year = parts[4];
         string laCode = parts[5];

@@ -29,7 +29,7 @@ public class SpreadsheetValidatorFunction(
         }
 
         bool isValid = await validationService.ValidateAsync(messageData!, errors);
-        logger.LogInformation("Spreadsheet validation {result} for message ID {messageId}. {errors}", isValid ? "succeeded" : "failed", messageData.MessageId, string.Join(", ", errors));
+        logger.LogInformation("Spreadsheet validation {result} for message ID {messageId}. {errors}", isValid ? "succeeded" : "failed", messageData!.MessageId, string.Join(", ", errors));
 
         await validationResultService.SendResultAsync(messageData.FileId!, isValid, errors);
 
