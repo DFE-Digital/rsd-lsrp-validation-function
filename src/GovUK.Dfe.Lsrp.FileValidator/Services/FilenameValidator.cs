@@ -24,7 +24,14 @@ public class FilenameValidator(IConfiguration configuration, ILogger<FilenameVal
             return false;
         }
 
-        FilenameComponents components = GetFilenameComponents(filename);
+        FilenameComponents? components = GetFilenameComponents(filename);
+        if (components == null)
+        {
+            logger.LogWarning("Filename does not have the expected format.");
+            errors.Add("Filename does not have the expected format.");
+            return false;
+        }
+
         var expectedVersion = configuration["SpreadsheetVersion"];
         var actualVersion = $"{components.Month}-{components.Year}";
         if (!string.Equals(expectedVersion, actualVersion, StringComparison.OrdinalIgnoreCase))
@@ -44,9 +51,11 @@ public class FilenameValidator(IConfiguration configuration, ILogger<FilenameVal
         return true;
     }
 
-    private FilenameComponents GetFilenameComponents(string filename)
+    private FilenameComponents? GetFilenameComponents(string filename)
     {
         string[] parts = filename.Split('-');
+        if (parts.Length < 6) return null;
+
         string month = parts[3];
         string year = parts[4];
         string laCode = parts[5];
