@@ -22,11 +22,11 @@ public class SpreadsheetValidationServiceTests(ITestOutputHelper output)
             Workflows = [new Workflow()]
         });
 
-        IFilenameValidator filenameValidator = null;
+        IFilenameValidator filenameValidator = Substitute.For<IFilenameValidator>();
         SpreadsheetValidationService service = new(filenameValidator, fileProvider, dataProvider, dataValidator, options);
         List<string> errors = [];
 
-        MessageData messageData = null;
+        MessageData messageData = new();
         InvalidOperationException exception = await Assert.ThrowsAsync<InvalidOperationException>(() => service.ValidateAsync(messageData, errors));
 
         Assert.Equal("Spreadsheet maps missing in configuration.", exception.Message);
@@ -44,11 +44,11 @@ public class SpreadsheetValidationServiceTests(ITestOutputHelper output)
             Workflows = null
         });
 
-        IFilenameValidator filenameValidator = null;
+        IFilenameValidator filenameValidator = Substitute.For<IFilenameValidator>();
         SpreadsheetValidationService service = new(filenameValidator, fileProvider, dataProvider, dataValidator, options);
         List<string> errors = [];
 
-        MessageData messageData = null;
+        MessageData messageData = new();
 
         InvalidOperationException exception = await Assert.ThrowsAsync<InvalidOperationException>(() => service.ValidateAsync(messageData, errors));
 

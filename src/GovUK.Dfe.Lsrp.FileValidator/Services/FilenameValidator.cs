@@ -1,7 +1,6 @@
 ﻿using GovUK.Dfe.Lsrp.FileValidator.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using System.Text.RegularExpressions;
 
 namespace GovUK.Dfe.Lsrp.FileValidator.Services;
 
@@ -9,12 +8,19 @@ public class FilenameValidator(IConfiguration configuration, ILogger<FilenameVal
 {
     public async Task<bool> ValidateFilenameAsync(string filename, LocalAuthority localAuthority, List<string> errors)
     {
-        string pattern = @"^lsrp-quarterly-return-[A-Za-z]+-\d{4}-\d{3}-[a-z-]+\.xlsx$";
-        bool result = Regex.IsMatch(filename, pattern);
-        if (!result)
+        if (string.IsNullOrWhiteSpace(filename)) throw new ArgumentException("Filename cannot be null or whitespace.", nameof(filename));
+
+        if (!filename.StartsWith("lsrp-quarterly-return-", StringComparison.OrdinalIgnoreCase))
         {
-            logger.LogWarning("Filename does not match the expected pattern.");
-            errors.Add("Filename does not match the expected pattern.");
+            logger.LogWarning("Filename does not start with the expected prefix 'lsrp-quarterly-return-'.");
+            errors.Add("Filename does not start with the expected prefix 'lsrp-quarterly-return-'.");
+            return false;
+        }
+
+        if (!filename.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+        {
+            logger.LogWarning("Filename does not have the expected .xlsx extension.");
+            errors.Add("Filename does not have the expected .xlsx extension.");
             return false;
         }
 
