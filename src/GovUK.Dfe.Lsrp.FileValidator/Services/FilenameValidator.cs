@@ -13,14 +13,14 @@ public class FilenameValidator(IConfiguration configuration, ILogger<FilenameVal
         if (!filename.StartsWith("lsrp-quarterly-return-", StringComparison.OrdinalIgnoreCase))
         {
             logger.LogWarning("Filename does not start with the expected prefix 'lsrp-quarterly-return-'.");
-            errors.Add("Filename does not start with the expected prefix 'lsrp-quarterly-return-'.");
+            errors.Add(GetMessage("IncorrectFilePrefixMessage"));
             return false;
         }
 
         if (!filename.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
         {
             logger.LogWarning("Filename does not have the expected .xlsx extension.");
-            errors.Add("Filename does not have the expected .xlsx extension.");
+            errors.Add(GetMessage("IncorrectFileExtensionMessage"));
             return false;
         }
 
@@ -28,7 +28,7 @@ public class FilenameValidator(IConfiguration configuration, ILogger<FilenameVal
         if (components == null)
         {
             logger.LogWarning("Filename does not have the expected format.");
-            errors.Add("Filename does not have the expected format.");
+            errors.Add(GetMessage("IncorrectFilenameFormatMessage"));
             return false;
         }
 
@@ -37,19 +37,21 @@ public class FilenameValidator(IConfiguration configuration, ILogger<FilenameVal
         if (!string.Equals(expectedVersion, actualVersion, StringComparison.OrdinalIgnoreCase))
         {
             logger.LogWarning("Spreadsheet version does not match the expected version. Expected: {expectedVersion}, Actual: {actualVersion}", expectedVersion, actualVersion);
-            errors.Add($"Spreadsheet version does not match the expected version. Expected: {expectedVersion}, Actual: {actualVersion}");
+            errors.Add(GetMessage("IncorrectSpreadsheetVersionMessage"));
             return false;
         }
 
         if (localAuthority.Code != components.LaCode)
         {
             logger.LogWarning("Local authority code {laCode} ({laName}) does not match that in message {messageLaCode}.", components.LaCode, components.LaName, localAuthority.Code);
-            errors.Add($"Local authority code {components.LaCode} ({components.LaName}) does not match that in message {localAuthority.Code} ({localAuthority.Name}).");
+            errors.Add(GetMessage("LocalAuthorityMismatchMessage"));
             return false;
         }
 
         return true;
     }
+
+    private string GetMessage(string key) => configuration[key] ?? $"{key} missing in configuration";
 
     private FilenameComponents? GetFilenameComponents(string filename)
     {

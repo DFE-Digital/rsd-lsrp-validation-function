@@ -131,7 +131,12 @@ public class FilenameValidatorTest(ITestOutputHelper output)
         => new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["SpreadsheetVersion"] = "September-2026"
+                ["SpreadsheetVersion"] = "September-2026",
+                ["LocalAuthorityMismatchMessage"] = "LocalAuthorityMismatchMessage test",
+                ["IncorrectFilenameFormatMessage"] = "IncorrectFilenameFormatMessage test",
+                ["IncorrectFilePrefixMessage"] = "IncorrectFilePrefixMessage test",
+                ["IncorrectFileExtensionMessage"] = "IncorrectFileExtensionMessage test",
+                ["IncorrectSpreadsheetVersionMessage"] = "IncorrectSpreadsheetVersionMessage test"
             })
             .Build();
 }

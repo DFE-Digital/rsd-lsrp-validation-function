@@ -1,0 +1,7 @@
+{
+  "LocalAuthorityMismatchMessage": "Local authority code does not match that in message",
+  "IncorrectFilePrefixMessage": "Filename does not start with the expected prefix of lsrp-quarterly-return-",
+  "IncorrectFileExtensionMessage": "Filename does not have the expected .xlsx extension",
+  "IncorrectFilenameFormatMessage": "Filename does not have the expected format",
+  "IncorrectSpreadsheetVersionMessage": "Spreadsheet version does not match the expected version"
+}
