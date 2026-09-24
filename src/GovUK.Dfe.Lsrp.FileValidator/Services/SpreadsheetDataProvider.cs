@@ -23,14 +23,14 @@ public class SpreadsheetDataProvider : ISpreadsheetDataProvider
             Sheet? wSheet = wbPart?.Workbook?.Descendants<Sheet>().FirstOrDefault(s => s.Name == spreadsheetMap.Worksheet);
             if (wSheet is null || wSheet.Id is null)
             {
-                errors.Add($"Sheet '{spreadsheetMap.Worksheet}' not found in the spreadsheet.");
+                errors.Add(spreadsheetMap.ErrorMessage ?? $"Sheet '{spreadsheetMap.Worksheet}' not found in the spreadsheet.");
                 continue;
             }
 
             WorksheetPart? wsPart = wbPart!.GetPartById(wSheet.Id!) as WorksheetPart;
             if (wsPart is null)
             {
-                errors.Add($"WorksheetPart for sheet '{spreadsheetMap.Worksheet}' not found.");
+                errors.Add(spreadsheetMap.ErrorMessage ?? $"WorksheetPart for sheet '{spreadsheetMap.Worksheet}' not found.");
                 continue;
             }
 

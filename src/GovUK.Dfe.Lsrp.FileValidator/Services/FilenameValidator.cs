@@ -13,14 +13,14 @@ public class FilenameValidator(IConfiguration configuration, ILogger<FilenameVal
         if (!filename.StartsWith("lsrp-quarterly-return-", StringComparison.OrdinalIgnoreCase))
         {
             logger.LogWarning("Filename does not start with the expected prefix 'lsrp-quarterly-return-'.");
-            errors.Add(GetMessage("IncorrectFilePrefixMessage"));
+            AddError(errors, "FilePrefixIncorrectMessage");
             return false;
         }
 
         if (!filename.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
         {
             logger.LogWarning("Filename does not have the expected .xlsx extension.");
-            errors.Add(GetMessage("IncorrectFileExtensionMessage"));
+            AddError(errors, "FileExtensionIncorrectMessage");
             return false;
         }
 
@@ -28,7 +28,7 @@ public class FilenameValidator(IConfiguration configuration, ILogger<FilenameVal
         if (components == null)
         {
             logger.LogWarning("Filename does not have the expected format.");
-            errors.Add(GetMessage("IncorrectFilenameFormatMessage"));
+            AddError(errors, "FilenameFormatIncorrectMessage");
             return false;
         }
 
@@ -37,19 +37,21 @@ public class FilenameValidator(IConfiguration configuration, ILogger<FilenameVal
         if (!string.Equals(expectedVersion, actualVersion, StringComparison.OrdinalIgnoreCase))
         {
             logger.LogWarning("Spreadsheet version does not match the expected version. Expected: {expectedVersion}, Actual: {actualVersion}", expectedVersion, actualVersion);
-            errors.Add(GetMessage("IncorrectSpreadsheetVersionMessage"));
+            AddError(errors, "SpreadsheetVersionIncorrectMessage");
             return false;
         }
 
         if (localAuthority.Code != components.LaCode)
         {
             logger.LogWarning("Local authority code {laCode} ({laName}) does not match that in message {messageLaCode}.", components.LaCode, components.LaName, localAuthority.Code);
-            errors.Add(GetMessage("LocalAuthorityMismatchMessage"));
+            AddError(errors, "LocalAuthorityMismatchMessage");
             return false;
         }
 
         return true;
     }
+
+    private void AddError(List<string> errors, string key) => errors.Add(GetMessage(key));
 
     private string GetMessage(string key) => configuration[key] ?? $"{key} missing in configuration";
 

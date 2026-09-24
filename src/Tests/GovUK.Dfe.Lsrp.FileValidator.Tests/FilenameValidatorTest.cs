@@ -133,10 +133,10 @@ public class FilenameValidatorTest(ITestOutputHelper output)
             {
                 ["SpreadsheetVersion"] = "September-2026",
                 ["LocalAuthorityMismatchMessage"] = "LocalAuthorityMismatchMessage test",
-                ["IncorrectFilenameFormatMessage"] = "IncorrectFilenameFormatMessage test",
-                ["IncorrectFilePrefixMessage"] = "IncorrectFilePrefixMessage test",
-                ["IncorrectFileExtensionMessage"] = "IncorrectFileExtensionMessage test",
-                ["IncorrectSpreadsheetVersionMessage"] = "IncorrectSpreadsheetVersionMessage test"
+                ["FilenameFormatIncorrectMessage"] = "FilenameFormatIncorrectMessage test",
+                ["FilePrefixIncorrectMessage"] = "FilePrefixIncorrectMessage test",
+                ["FileExtensionIncorrectMessage"] = "FileExtensionIncorrectMessage test",
+                ["SpreadsheetVersionIncorrectMessage"] = "SpreadsheetVersionIncorrectMessage test"
             })
             .Build();
 }
