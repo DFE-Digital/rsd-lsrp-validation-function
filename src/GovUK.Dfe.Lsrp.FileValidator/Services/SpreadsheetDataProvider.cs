@@ -23,14 +23,14 @@ public class SpreadsheetDataProvider : ISpreadsheetDataProvider
             Sheet? wSheet = wbPart?.Workbook?.Descendants<Sheet>().FirstOrDefault(s => s.Name == spreadsheetMap.Worksheet);
             if (wSheet is null || wSheet.Id is null)
             {
-                errors.Add($"Sheet '{spreadsheetMap.Worksheet}' not found in the spreadsheet.");
+                errors.Add(spreadsheetMap.ErrorMessage ?? $"Sheet '{spreadsheetMap.Worksheet}' not found in the spreadsheet.");
                 continue;
             }
 
             WorksheetPart? wsPart = wbPart!.GetPartById(wSheet.Id!) as WorksheetPart;
             if (wsPart is null)
             {
-                errors.Add($"WorksheetPart for sheet '{spreadsheetMap.Worksheet}' not found.");
+                errors.Add(spreadsheetMap.ErrorMessage ?? $"WorksheetPart for sheet '{spreadsheetMap.Worksheet}' not found.");
                 continue;
             }
 
@@ -84,13 +84,9 @@ public class SpreadsheetDataProvider : ISpreadsheetDataProvider
                     {
                         if (string.IsNullOrEmpty(dataColumn.ColumnName)) continue;
                         var columnHasData = cells.Any(c => c.CellReference != null && c.CellReference.HasValue && c.CellReference.Value!.StartsWith(dataColumn.ColumnName) && !string.IsNullOrEmpty(c.InnerText));
-                        if (dataColumn.HasData && !columnHasData)
+                        if (dataColumn.HasData != columnHasData)
                         {
-                            errors.Add($"Column '{dataColumn.ColumnName}' is expected to have data but does not.");
-                        }
-                        else if (!dataColumn.HasData && columnHasData)
-                        {
-                            errors.Add($"Column '{dataColumn.ColumnName}' is not expected to have data but does.");
+                            errors.Add(dataColumn!.ErrorMessage ?? $"{dataColumn.ColumnName} ErrorMessage missing in validation options.");
                         }
                     }
                 }

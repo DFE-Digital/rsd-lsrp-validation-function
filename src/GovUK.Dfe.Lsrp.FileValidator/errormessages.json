@@ -1,0 +1,7 @@
+{
+  "LocalAuthorityMismatchMessage": "Filename local authority code does not match that in message",
+  "FilePrefixIncorrectMessage": "Filename does not start with the expected prefix of lsrp-quarterly-return-",
+  "FileExtensionIncorrectMessage": "The return must be a XLSX file. The file you have uploaded is saved as an incompatible file type. Action required: Make sure the return is saved as an XLSX spreadsheet.",
+  "FilenameFormatIncorrectMessage": "Filename does not have the expected format",
+  "SpreadsheetVersionIncorrectMessage": "Spreadsheet version does not match the expected version"
+}

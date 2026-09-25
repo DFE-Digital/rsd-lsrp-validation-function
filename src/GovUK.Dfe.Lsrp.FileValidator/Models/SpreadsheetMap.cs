@@ -3,6 +3,7 @@
 public class SpreadsheetMap
 {
     public string? Worksheet { get; set; }
+    public string? ErrorMessage { get; set; }
     public IEnumerable<DataMap>? DataMaps { get; set; }
     public IEnumerable<DataColumn>? DataColumns { get; set; }
 }

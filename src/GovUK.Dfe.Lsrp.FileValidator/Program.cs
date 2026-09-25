@@ -3,6 +3,7 @@ using GovUK.Dfe.Lsrp.FileValidator.Models;
 using GovUK.Dfe.Lsrp.FileValidator.Services;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Azure.Functions.Worker.OpenTelemetry;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -12,6 +13,8 @@ builder.ConfigureFunctionsWebApplication();
 
 var validationSection = builder.Configuration.GetSection("ValidationOptions");
 builder.Services.Configure<ValidationOptions>(validationSection);
+
+builder.Configuration.AddJsonFile("errormessages.json", optional: true, reloadOnChange: true);
 
 if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING")))
 {
