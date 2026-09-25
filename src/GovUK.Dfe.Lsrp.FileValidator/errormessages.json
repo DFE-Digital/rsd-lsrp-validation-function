@@ -1,5 +1,5 @@
 {
-  "LocalAuthorityMismatchMessage": "Local authority names must match. The names you have given for the local authority you are submitting data for do not match. Action required: Check and correct the local authority you have selected in this service and named in cell B13 in the Cover page of the spreadsheet.",
+  "LocalAuthorityMismatchMessage": "Filename local authority code does not match that in message",
   "FilePrefixIncorrectMessage": "Filename does not start with the expected prefix of lsrp-quarterly-return-",
   "FileExtensionIncorrectMessage": "The return must be a XLSX file. The file you have uploaded is saved as an incompatible file type. Action required: Make sure the return is saved as an XLSX spreadsheet.",
   "FilenameFormatIncorrectMessage": "Filename does not have the expected format",

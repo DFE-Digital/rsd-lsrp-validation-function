@@ -4,4 +4,5 @@ public class DataColumn
 {
     public string? ColumnName { get; set; }
     public bool HasData { get; set; }
+    public string? ErrorMessage { get; set; }
 }

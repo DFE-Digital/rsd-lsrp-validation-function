@@ -84,13 +84,9 @@ public class SpreadsheetDataProvider : ISpreadsheetDataProvider
                     {
                         if (string.IsNullOrEmpty(dataColumn.ColumnName)) continue;
                         var columnHasData = cells.Any(c => c.CellReference != null && c.CellReference.HasValue && c.CellReference.Value!.StartsWith(dataColumn.ColumnName) && !string.IsNullOrEmpty(c.InnerText));
-                        if (dataColumn.HasData && !columnHasData)
+                        if (dataColumn.HasData != columnHasData)
                         {
-                            errors.Add($"Column '{dataColumn.ColumnName}' is expected to have data but does not.");
-                        }
-                        else if (!dataColumn.HasData && columnHasData)
-                        {
-                            errors.Add($"Column '{dataColumn.ColumnName}' is not expected to have data but does.");
+                            errors.Add(dataColumn!.ErrorMessage ?? $"{dataColumn.ColumnName} ErrorMessage missing in validation options.");
                         }
                     }
                 }
