@@ -36,7 +36,7 @@ public class DataValidator : IDataValidator
 public class Utils
 {
     /// <summary>
-    /// Checks if the given year string is in the format "20xx-yy Data" and represents consecutive years.
+    /// Checks if the given year string is in the format "20xx-yy Quarterly Data" and represents consecutive years.
     /// </summary>
     public static bool CheckYear(string year)
     {
@@ -45,7 +45,7 @@ public class Utils
             return false;
         }
 
-        var isValid = Regex.IsMatch(year, "^20\\d{2}-\\d{2} Data$");
+        var isValid = Regex.IsMatch(year, "^20\\d{2}-\\d{2} Quarterly Data$");
         if (!isValid)
         {
             return false;

@@ -1,7 +1,7 @@
 {
   "SpreadsheetMaps": [
     {
-      "Worksheet": "Quarterly Returns",
+      "Worksheet": "Quarterly Return Template",
       "DataMaps": [
         {
           "Name": "DataYear",
@@ -20,9 +20,6 @@
       ]
     },
     {
-      "Worksheet": "Guidance"
-    },
-    {
       "Worksheet": "Cover",
       "DataMaps": [
         {
@@ -34,12 +31,12 @@
   ],
   "Workflows": [
     {
-      "WorkflowName": "Quarterly Returns",
+      "WorkflowName": "Quarterly Return Template",
       "Rules": [
         {
           "RuleName": "Rule1",
           "Expression": "Utils.CheckYear(data.DataYear)",
-          "ErrorMessage": "Data Year must be of format \"20xx-yy Data\" and represent consecutive years"
+          "ErrorMessage": "Data Year must be of format \"20xx-yy Quarterly Data\" and represent consecutive years"
         }
       ]
     },
