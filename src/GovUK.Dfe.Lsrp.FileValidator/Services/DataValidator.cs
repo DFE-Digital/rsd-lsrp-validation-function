@@ -63,8 +63,13 @@ public class Utils
     /// <remarks>
     /// Only the local authority code is checked, not the name, as the name may vary in formatting.
     /// </remarks>
-    public static bool CheckLocalAuthority(string actualLocalAuthority, LocalAuthority expectedLocalAuthority)
+    public static bool CheckLocalAuthority(string? actualLocalAuthority, LocalAuthority expectedLocalAuthority)
     {
+        if (string.IsNullOrEmpty(actualLocalAuthority))
+        {
+            return false;
+        }
+
         var localAuthorityCode = actualLocalAuthority.Split(' ')[0]; // Get the first part of the string before any space
         return string.Equals(localAuthorityCode, expectedLocalAuthority.Code, StringComparison.OrdinalIgnoreCase);
     }
