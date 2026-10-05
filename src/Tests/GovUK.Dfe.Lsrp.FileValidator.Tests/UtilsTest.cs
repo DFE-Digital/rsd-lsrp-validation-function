@@ -1,4 +1,5 @@
-﻿using GovUK.Dfe.Lsrp.FileValidator.Services;
+﻿using GovUK.Dfe.Lsrp.FileValidator.Models;
+using GovUK.Dfe.Lsrp.FileValidator.Services;
 
 namespace GovUK.Dfe.Lsrp.FileValidator.Tests;
 
@@ -46,6 +47,29 @@ public class UtilsTest
     public void CheckYear_WhenValueIsNull_ReturnsFalse()
     {
         bool result = Utils.CheckYear(null!);
+
+        Assert.False(result);
+    }
+
+    [Theory]
+    [InlineData("LA1 Local Authority 1", "LA1", "Local-Authority-1")]
+    [InlineData("LA1  Local Authority 1", "LA1", "Local-Authority-1")]
+    [InlineData("LA1", "LA1", "")]
+    public void CheckLocalAuthority_WhenLocalAuthoritiesMatch_ReturnsTrue(string actualLocalAuthority, string expectedCode, string expectedName)
+    {
+        LocalAuthority expectedLocalAuthority = new() { Code = expectedCode, Name = expectedName };
+        bool result = Utils.CheckLocalAuthority(actualLocalAuthority, expectedLocalAuthority);
+
+        Assert.True(result);
+    }
+
+    [Theory]
+    [InlineData("LA2 Local Authority 2", "LA1", "Local-Authority-1")]
+    [InlineData("LA1Local Authority 1", "LA1", "Local-Authority-1")]
+    public void CheckLocalAuthority_WhenLocalAuthoritiesDoNotMatch_ReturnsFalse(string actualLocalAuthority, string expectedCode, string expectedName)
+    {
+        LocalAuthority expectedLocalAuthority = new() { Code = expectedCode, Name = expectedName };
+        bool result = Utils.CheckLocalAuthority(actualLocalAuthority, expectedLocalAuthority);
 
         Assert.False(result);
     }

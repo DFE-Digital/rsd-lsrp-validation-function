@@ -45,7 +45,7 @@
       "Rules": [
         {
           "RuleName": "Rule1",
-          "Expression": "data.LocalAuthority = localAuthority.ToString()",
+          "Expression": "Utils.CheckLocalAuthority(data.LocalAuthority, localAuthority)",
           "ErrorMessage": "Local Authority must match"
         }
       ]
