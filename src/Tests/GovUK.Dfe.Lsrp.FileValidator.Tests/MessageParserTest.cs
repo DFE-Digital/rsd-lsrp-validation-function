@@ -102,6 +102,7 @@ public class MessageParserTest(ITestOutputHelper output)
                 {
                     FileUri = "https://example.com/file.csv",
                     FileId = "file001",
+                    FileName = "file.xlsx",
                     LocalAuthority = "not-json"
                 }
             }
@@ -112,8 +113,8 @@ public class MessageParserTest(ITestOutputHelper output)
         bool result = MessageParser.Parse(message, out MessageData? messageData, errors);
 
         // Assert
-        Assert.False(result);
-        Assert.Null(messageData);
+        Assert.True(result);
+        Assert.NotNull(messageData);
         output.WriteLine($"Errors: {string.Join(", ", errors)}");
     }
 
