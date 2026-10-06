@@ -56,4 +56,21 @@ public class Utils
         int year2 = int.Parse(years[1][..2]) + 2000; // Convert yy to yyyy
         return year2 - year1 == 1;
     }
+
+    /// <summary>
+    /// Checks if given local authorities match (code only)
+    /// </summary>
+    /// <remarks>
+    /// Only the local authority code is checked, not the name, as the name may vary in formatting.
+    /// </remarks>
+    public static bool CheckLocalAuthority(string? actualLocalAuthority, LocalAuthority expectedLocalAuthority)
+    {
+        if (string.IsNullOrEmpty(actualLocalAuthority))
+        {
+            return false;
+        }
+
+        var localAuthorityCode = actualLocalAuthority.Split(' ')[0]; // Get the first part of the string before any space
+        return string.Equals(localAuthorityCode, expectedLocalAuthority.Code, StringComparison.OrdinalIgnoreCase);
+    }
 }
