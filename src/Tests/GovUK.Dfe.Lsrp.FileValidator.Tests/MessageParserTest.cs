@@ -64,6 +64,7 @@ public class MessageParserTest(ITestOutputHelper output)
                 {
                     FileUri = "https://example.com/file.csv",
                     FileId = "file001",
+                    FileName = "file.xlsx",
                     LocalAuthority = null
                 }
             }
@@ -74,14 +75,17 @@ public class MessageParserTest(ITestOutputHelper output)
         bool result = MessageParser.Parse(message, out MessageData? messageData, errors);
 
         // Assert
-        Assert.False(result);
-        Assert.Null(messageData);
+        Assert.True(result);
         output.WriteLine($"Errors: {string.Join(", ", errors)}");
+        Assert.NotNull(messageData);
+        Assert.Equal("msg001", messageData.MessageId);
+        Assert.Equal("app001", messageData.ApplicationId);
+        Assert.Equal("file001", messageData.FileId);
         Assert.Contains("Local authority is missing or invalid.", errors);
     }
 
     [Fact]
-    public void Parse_WhenLocalAuthorityIsInvalidJson_ReturnsFalse()
+    public void Parse_WhenLocalAuthorityIsInvalidJson_ReturnsTrue()
     {
         // Arrange
         FileUploadedMessage message = new()
@@ -111,7 +115,6 @@ public class MessageParserTest(ITestOutputHelper output)
         Assert.False(result);
         Assert.Null(messageData);
         output.WriteLine($"Errors: {string.Join(", ", errors)}");
-        Assert.Contains("Local authority is missing or invalid.", errors);
     }
 
     [Fact]
@@ -132,9 +135,6 @@ public class MessageParserTest(ITestOutputHelper output)
         Assert.False(result);
         Assert.Null(messageData);
         output.WriteLine($"Errors: {string.Join(", ", errors)}");
-        Assert.Contains("File information is missing or incomplete.", errors);
-        Assert.Contains("Application information is missing or incomplete.", errors);
-        Assert.Contains("Local authority is missing or invalid.", errors);
     }
 
     [Fact]

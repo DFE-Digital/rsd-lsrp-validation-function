@@ -19,7 +19,7 @@ public class SpreadsheetValidatorFunctionTest
         IFileValidationResultService validationResultService = Substitute.For<IFileValidationResultService>();
         validationResultService.SendResultAsync(Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<IEnumerable<string>>()).Returns(Task.CompletedTask);
         SpreadsheetValidatorFunction function = new(validationService, validationResultService, NullLogger<SpreadsheetValidatorFunction>.Instance);
-        ServiceBusReceivedMessage message = CreateMessage("test.xlsx", "file-id-123");
+        ServiceBusReceivedMessage message = CreateMessage("test.xlsx", "file-id-123", new LocalAuthority { Code = "LA-Code", Name = "LA-Name" });
         ServiceBusMessageActions messageActions = Substitute.For<ServiceBusMessageActions>();
 
         await function.Run(message, messageActions);
@@ -45,8 +45,19 @@ public class SpreadsheetValidatorFunctionTest
         await messageActions.DidNotReceive().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
     }
 
-    private static ServiceBusReceivedMessage CreateMessage(string? fileUri, string? fileId)
+    private static ServiceBusReceivedMessage CreateMessage(string? fileUri, string? fileId, LocalAuthority? localAuthority = null)
     {
+        Payload payload = new()
+        {
+            FileUri = fileUri,
+            FileId = fileId,
+            FileName = "file.xlsx"
+        };
+        if (localAuthority != null)
+        {
+            payload.LocalAuthority = JsonSerializer.Serialize(localAuthority);
+        }
+
         var message = new FileUploadedMessage
         {
             Message = new Message
@@ -56,13 +67,7 @@ public class SpreadsheetValidatorFunctionTest
                     ApplicationId = "00000000-0000-0000-0000-000000000001",
                     ApplicationReference = "APP-001"
                 },
-                Payload = new Payload
-                {
-                    FileUri = fileUri,
-                    FileId = fileId,
-                    FileName = "file.xlsx",
-                    LocalAuthority = "{\"name\":\"LA-Name\",\"code\":\"LA-Code\"}"
-                }
+                Payload = payload
             }
         };
         return ServiceBusModelFactory.ServiceBusReceivedMessage(
@@ -87,5 +92,19 @@ public class SpreadsheetValidatorFunctionTest
         await validationService.DidNotReceive().ValidateAsync(Arg.Any<MessageData>(), Arg.Any<List<string>>());
         await validationResultService.DidNotReceive().SendResultAsync(Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<IEnumerable<string>>());
         await messageActions.DidNotReceive().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Run_WhenLocalAuthorityMissing_ThrowsValidationError()
+    {
+        ISpreadsheetValidationService validationService = Substitute.For<ISpreadsheetValidationService>();
+        IFileValidationResultService validationResultService = Substitute.For<IFileValidationResultService>();
+        SpreadsheetValidatorFunction function = new(validationService, validationResultService, NullLogger<SpreadsheetValidatorFunction>.Instance);
+        ServiceBusReceivedMessage message = CreateMessage("test.xlsx", "file-id-123", null);
+        ServiceBusMessageActions messageActions = Substitute.For<ServiceBusMessageActions>();
+        await function.Run(message, messageActions);
+        await validationService.DidNotReceive().ValidateAsync(Arg.Any<MessageData>(), Arg.Any<List<string>>());
+        await validationResultService.Received().SendResultAsync(Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<IEnumerable<string>>());
+        await messageActions.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
     }
 }
