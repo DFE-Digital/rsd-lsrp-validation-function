@@ -104,7 +104,7 @@ public class SpreadsheetValidatorFunctionTest
         ServiceBusMessageActions messageActions = Substitute.For<ServiceBusMessageActions>();
         await function.Run(message, messageActions);
         await validationService.DidNotReceive().ValidateAsync(Arg.Any<MessageData>(), Arg.Any<List<string>>());
-        await validationResultService.Received().SendResultAsync(Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<IEnumerable<string>>());
+        await validationResultService.Received(1).SendResultAsync("file-id-123", false, Arg.Is<IEnumerable<string>>(errors => new List<string>(errors).Contains("Local authority is missing or invalid.")));
         await messageActions.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
     }
 }
