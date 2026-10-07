@@ -28,10 +28,16 @@ public class SpreadsheetValidatorFunction(
             throw new InvalidDataException($"Message body not valid: {string.Join(", ", errors)}");
         }
 
-        bool isValid = await validationService.ValidateAsync(messageData!, errors);
-        logger.LogInformation("Spreadsheet validation {result} for message ID {messageId}. {errors}", isValid ? "succeeded" : "failed", messageData!.MessageId, string.Join(", ", errors));
+        bool isValid = errors.Count == 0 && await validationService.ValidateAsync(messageData!, errors);
 
-        await validationResultService.SendResultAsync(messageData.FileId!, isValid, errors);
+        logger.LogInformation("Spreadsheet validation {result} for message ID {messageId}. {errors}", isValid ? "succeeded" : "failed", messageData?.MessageId, string.Join(", ", errors));
+
+        if (string.IsNullOrEmpty(messageData?.FileId))
+        {
+            throw new InvalidDataException($"Message has no FileId: {string.Join(", ", errors)}");
+        }
+
+        await validationResultService.SendResultAsync(messageData.FileId, isValid, errors);
 
         await messageActions.CompleteMessageAsync(message);
     }

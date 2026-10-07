@@ -9,9 +9,16 @@ namespace GovUK.Dfe.Lsrp.FileValidator
 
         public static bool Parse(FileUploadedMessage fileMessage, out MessageData? messageData, List<string> errors)
         {
-            if (!ValidateMessage(fileMessage, out LocalAuthority? localAuthority, errors))
+            messageData = null;
+
+            if (fileMessage.Message == null)
             {
-                messageData = null;
+                errors.Add("Message is null.");
+                return false;
+            }
+
+            if (!ValidateMessage(fileMessage, errors))
+            {
                 return false;
             }
 
@@ -21,23 +28,22 @@ namespace GovUK.Dfe.Lsrp.FileValidator
                 FileId = fileMessage.Message?.Payload?.FileId,
                 FileName = fileMessage.Message?.Payload?.FileName,
                 MessageId = fileMessage.MessageId,
-                ApplicationId = fileMessage.Message?.Metadata?.ApplicationId,
-                LocalAuthority = localAuthority
+                ApplicationId = fileMessage.Message?.Metadata?.ApplicationId
             };
+
+            if (!HasLocalAuthority(fileMessage.Message, out LocalAuthority? localAuthority))
+            {
+                errors.Add("Local authority is missing or invalid.");
+            }
+
+            messageData.LocalAuthority = localAuthority;
 
             return true;
         }
 
-        private static bool ValidateMessage(FileUploadedMessage fileMessage, out LocalAuthority? localAuthority, List<string> errors)
+        private static bool ValidateMessage(FileUploadedMessage fileMessage, List<string> errors)
         {
-            localAuthority = null;
             var isValid = true;
-
-            if (fileMessage.Message == null)
-            {
-                errors.Add("Message is null.");
-                return false;
-            }
 
             if (!HasFile(fileMessage.Message))
             {
@@ -48,12 +54,6 @@ namespace GovUK.Dfe.Lsrp.FileValidator
             if (!HasApplication(fileMessage.Message))
             {
                 errors.Add("Application information is missing or incomplete.");
-                isValid = false;
-            }
-
-            if (!HasLocalAuthority(fileMessage.Message, out localAuthority))
-            {
-                errors.Add("Local authority is missing or invalid.");
                 isValid = false;
             }
 
