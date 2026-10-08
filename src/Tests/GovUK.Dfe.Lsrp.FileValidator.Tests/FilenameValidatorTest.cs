@@ -103,7 +103,6 @@ public class FilenameValidatorTest(ITestOutputHelper output)
                 ["FilenameFormatIncorrectMessage"] = "FilenameFormatIncorrectMessage test",
                 ["FilePrefixIncorrectMessage"] = "FilePrefixIncorrectMessage test",
                 ["FileExtensionIncorrectMessage"] = "FileExtensionIncorrectMessage test",
-                ["SpreadsheetVersionIncorrectMessage"] = "SpreadsheetVersionIncorrectMessage test"
             })
             .Build();
 }
