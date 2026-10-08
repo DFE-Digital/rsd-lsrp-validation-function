@@ -54,17 +54,19 @@ public class FilenameValidator(IConfiguration configuration, ILogger<FilenameVal
 
     private string? GetLaCode(string filename, string expectedPrefix)
     {
-        int index = filename.IndexOf(expectedPrefix, StringComparison.OrdinalIgnoreCase);
-        string la = filename[(index + expectedPrefix.Length)..];
-        string[] parts = la.Split('-');
-        if (parts.Length < 1) return null;
+        var extIndex = filename.LastIndexOf(".xlsx", StringComparison.OrdinalIgnoreCase);
+        string la = filename[expectedPrefix.Length..extIndex];
+        if (string.IsNullOrWhiteSpace(la))
+        {
+            logger.LogWarning("Local authority not found in filename.");
+            return null;
+        }
 
-        string laCode = parts[0];
-
-        index = filename.LastIndexOf($"{laCode}-", StringComparison.Ordinal) + laCode.Length + 1;
-        string laName = filename[index..].Replace(".xlsx", "");
-
+        var index = la.IndexOf('-');
+        string laCode = la[..index];
+        string laName = la[(index + 1)..];
         logger.LogInformation("Extracted local authority code: {laCode}, local authority name: {laName} from filename.", laCode, laName);
+        
         return laCode;
     }
 }

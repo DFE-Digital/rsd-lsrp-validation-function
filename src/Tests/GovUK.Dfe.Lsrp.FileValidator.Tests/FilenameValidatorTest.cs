@@ -23,6 +23,7 @@ public class FilenameValidatorTest(ITestOutputHelper output)
         Assert.True(result);
         Assert.Empty(errors);
     }
+
     [Fact]
     public async Task ValidateFilename_ShouldReturnTrueForValidUppercaseFilenameAsync()
     {
@@ -87,6 +88,24 @@ public class FilenameValidatorTest(ITestOutputHelper output)
         var validator = new FilenameValidator(configuration, new TestLogger<FilenameValidator>(output));
         List<string> errors = [];
         var result = await validator.ValidateFilenameAsync(filename, new LocalAuthority { Code = "301", Name = "Barking and Dagenham" }, errors);
+
+        // Assert
+        Assert.False(result);
+        Assert.NotEmpty(errors);
+        output.WriteLine($"Errors: {string.Join(", ", errors)}");
+    }
+
+    [Fact]
+    public async Task ValidateFilename_ShouldReturnFalseForShortFilenameAsync()
+    {
+        // Arrange
+        var filename = "lsrp-quarterly-return-september-2026-.xlsx";
+
+        // Act
+        IConfiguration configuration = CreateConfiguration();
+        var validator = new FilenameValidator(configuration, new TestLogger<FilenameValidator>(output));
+        List<string> errors = [];
+        bool result = await validator.ValidateFilenameAsync(filename, new LocalAuthority { Code = "301", Name = "Barking and Dagenham" }, errors);
 
         // Assert
         Assert.False(result);
