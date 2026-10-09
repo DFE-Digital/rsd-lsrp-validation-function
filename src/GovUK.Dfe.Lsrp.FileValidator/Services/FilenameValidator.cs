@@ -10,9 +10,15 @@ public class FilenameValidator(IConfiguration configuration, ILogger<FilenameVal
     {
         if (string.IsNullOrWhiteSpace(filename)) throw new ArgumentException("Filename cannot be null or whitespace.", nameof(filename));
 
-        if (!filename.StartsWith("lsrp-quarterly-return-", StringComparison.OrdinalIgnoreCase))
+        var expectedPrefix = configuration["FilenamePrefix"];
+        if (string.IsNullOrWhiteSpace(expectedPrefix))
         {
-            logger.LogWarning("Filename does not start with the expected prefix 'lsrp-quarterly-return-'.");
+            throw new InvalidOperationException("Expected filename prefix is not configured.");
+        }
+
+        if (!filename.StartsWith(expectedPrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            logger.LogWarning("Filename does not start with the expected prefix '{expectedPrefix}'.", expectedPrefix);
             AddError(errors, "FilePrefixIncorrectMessage");
             return false;
         }
@@ -24,26 +30,17 @@ public class FilenameValidator(IConfiguration configuration, ILogger<FilenameVal
             return false;
         }
 
-        FilenameComponents? components = GetFilenameComponents(filename);
-        if (components == null)
+        string? laCode = GetLaCode(filename, expectedPrefix);
+        if (laCode == null)
         {
             logger.LogWarning("Filename does not have the expected format.");
             AddError(errors, "FilenameFormatIncorrectMessage");
             return false;
         }
 
-        var expectedVersion = configuration["SpreadsheetVersion"];
-        var actualVersion = $"{components.Month}-{components.Year}";
-        if (!string.Equals(expectedVersion, actualVersion, StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(localAuthority.Code, laCode, StringComparison.OrdinalIgnoreCase))
         {
-            logger.LogWarning("Spreadsheet version does not match the expected version. Expected: {expectedVersion}, Actual: {actualVersion}", expectedVersion, actualVersion);
-            AddError(errors, "SpreadsheetVersionIncorrectMessage");
-            return false;
-        }
-
-        if (localAuthority.Code != components.LaCode)
-        {
-            logger.LogWarning("Local authority code {laCode} ({laName}) does not match that in message {messageLaCode}.", components.LaCode, components.LaName, localAuthority.Code);
+            logger.LogWarning("Local authority code {laCode} does not match that in message {messageLaCode}.", laCode, localAuthority.Code);
             AddError(errors, "LocalAuthorityMismatchMessage");
             return false;
         }
@@ -55,21 +52,21 @@ public class FilenameValidator(IConfiguration configuration, ILogger<FilenameVal
 
     private string GetMessage(string key) => configuration[key] ?? $"{key} missing in configuration";
 
-    private FilenameComponents? GetFilenameComponents(string filename)
+    private string? GetLaCode(string filename, string expectedPrefix)
     {
-        string[] parts = filename.Split('-');
-        if (parts.Length < 6) return null;
+        var extIndex = filename.LastIndexOf(".xlsx", StringComparison.OrdinalIgnoreCase);
+        string la = filename[expectedPrefix.Length..extIndex];
+        if (string.IsNullOrWhiteSpace(la))
+        {
+            logger.LogWarning("Local authority not found in filename.");
+            return null;
+        }
 
-        string month = parts[3];
-        string year = parts[4];
-        string laCode = parts[5];
-
-        int index = filename.LastIndexOf($"{laCode}-", StringComparison.Ordinal) + laCode.Length + 1;
-        string laName = filename[index..].Replace(".xlsx", "");
-
-        logger.LogInformation("Extracted month: {month}, year: {year}, local authority code: {laCode}, local authority name: {laName} from filename.", month, year, laCode, laName);
-        return new FilenameComponents(month, year, laCode, laName);
+        var index = la.IndexOf('-');
+        string laCode = la[..index];
+        string laName = la[(index + 1)..];
+        logger.LogInformation("Extracted local authority code: {laCode}, local authority name: {laName} from filename.", laCode, laName);
+        
+        return laCode;
     }
-
-    private record FilenameComponents(string Month, string Year, string LaCode, string LaName);
 }

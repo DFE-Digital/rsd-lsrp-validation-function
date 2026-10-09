@@ -23,6 +23,7 @@ public class FilenameValidatorTest(ITestOutputHelper output)
         Assert.True(result);
         Assert.Empty(errors);
     }
+
     [Fact]
     public async Task ValidateFilename_ShouldReturnTrueForValidUppercaseFilenameAsync()
     {
@@ -77,24 +78,6 @@ public class FilenameValidatorTest(ITestOutputHelper output)
     }
 
     [Fact]
-    public async Task ValidateFilename_ShouldReturnFalseForInvalidVersionAsync()
-    {
-        // Arrange
-        var filename = "lsrp-quarterly-return-June-2026-301-barking-and-dagenham.xlsx";
-
-        // Act
-        IConfiguration configuration = CreateConfiguration();
-        var validator = new FilenameValidator(configuration, new TestLogger<FilenameValidator>(output));
-        List<string> errors = [];
-        var result = await validator.ValidateFilenameAsync(filename, new LocalAuthority { Code = "301", Name = "Barking and Dagenham" }, errors);
-
-        // Assert
-        Assert.False(result);
-        Assert.NotEmpty(errors);
-        output.WriteLine($"Errors: {string.Join(", ", errors)}");
-    }
-
-    [Fact]
     public async Task ValidateFilename_ShouldReturnFalseForInvalidExtensionAsync()
     {
         // Arrange
@@ -113,15 +96,18 @@ public class FilenameValidatorTest(ITestOutputHelper output)
     }
 
     [Fact]
-    public async Task ValidateFilename_ShouldReturnFalseForInvalidComponentsAsync()
+    public async Task ValidateFilename_ShouldReturnFalseForShortFilenameAsync()
     {
-        var filename = "lsrp-quarterly-return-.xlsx";
+        // Arrange
+        var filename = "lsrp-quarterly-return-september-2026-.xlsx";
 
+        // Act
         IConfiguration configuration = CreateConfiguration();
         var validator = new FilenameValidator(configuration, new TestLogger<FilenameValidator>(output));
         List<string> errors = [];
-        var result = await validator.ValidateFilenameAsync(filename, new LocalAuthority { Code = "301", Name = "Barking and Dagenham" }, errors);
+        bool result = await validator.ValidateFilenameAsync(filename, new LocalAuthority { Code = "301", Name = "Barking and Dagenham" }, errors);
 
+        // Assert
         Assert.False(result);
         Assert.NotEmpty(errors);
         output.WriteLine($"Errors: {string.Join(", ", errors)}");
@@ -131,12 +117,11 @@ public class FilenameValidatorTest(ITestOutputHelper output)
         => new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["SpreadsheetVersion"] = "September-2026",
+                ["FilenamePrefix"] = "lsrp-quarterly-return-September-2026-",
                 ["LocalAuthorityMismatchMessage"] = "LocalAuthorityMismatchMessage test",
                 ["FilenameFormatIncorrectMessage"] = "FilenameFormatIncorrectMessage test",
                 ["FilePrefixIncorrectMessage"] = "FilePrefixIncorrectMessage test",
                 ["FileExtensionIncorrectMessage"] = "FileExtensionIncorrectMessage test",
-                ["SpreadsheetVersionIncorrectMessage"] = "SpreadsheetVersionIncorrectMessage test"
             })
             .Build();
 }
