@@ -8,6 +8,7 @@ using System.Text.Json;
 namespace GovUK.Dfe.Lsrp.FileValidator;
 
 public class SpreadsheetValidatorFunction(
+    IMessageParser messageParser,
     ISpreadsheetValidationService validationService, 
     IFileValidationResultService validationResultService, 
     ILogger<SpreadsheetValidatorFunction> logger)
@@ -23,7 +24,7 @@ public class SpreadsheetValidatorFunction(
 
         List<string> errors = [];
 
-        if (!MessageParser.Parse(fileMessage, out MessageData? messageData, errors))
+        if (!messageParser.Parse(fileMessage, out MessageData? messageData, errors))
         {
             throw new InvalidDataException($"Message body not valid: {string.Join(", ", errors)}");
         }

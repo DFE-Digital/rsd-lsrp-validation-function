@@ -1,13 +1,14 @@
 ﻿using GovUK.Dfe.Lsrp.FileValidator.Models;
+using Microsoft.Extensions.Configuration;
 using System.Text.Json;
 
 namespace GovUK.Dfe.Lsrp.FileValidator
 {
-    public class MessageParser
+    public class MessageParser(IConfiguration configuration) : IMessageParser
     {
         private static readonly JsonSerializerOptions? jsonOptions = new() { PropertyNameCaseInsensitive = true };
 
-        public static bool Parse(FileUploadedMessage fileMessage, out MessageData? messageData, List<string> errors)
+        public bool Parse(FileUploadedMessage fileMessage, out MessageData? messageData, List<string> errors)
         {
             messageData = null;
 
@@ -33,7 +34,7 @@ namespace GovUK.Dfe.Lsrp.FileValidator
 
             if (!HasLocalAuthority(fileMessage.Message, out LocalAuthority? localAuthority))
             {
-                errors.Add("Local authority is missing or invalid.");
+                errors.Add(configuration["LocalAuthorityMissingMessage"] ?? " Local authority is missing or invalid.");
             }
 
             messageData.LocalAuthority = localAuthority;
