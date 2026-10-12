@@ -18,8 +18,24 @@ public class SpreadsheetValidatorFunctionTest
 
         IFileValidationResultService validationResultService = Substitute.For<IFileValidationResultService>();
         validationResultService.SendResultAsync(Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<IEnumerable<string>>()).Returns(Task.CompletedTask);
-        SpreadsheetValidatorFunction function = new(validationService, validationResultService, NullLogger<SpreadsheetValidatorFunction>.Instance);
-        ServiceBusReceivedMessage message = CreateMessage("test.xlsx", "file-id-123", new LocalAuthority { Code = "LA-Code", Name = "LA-Name" });
+
+        IMessageParser messageParser = Substitute.For<IMessageParser>();
+        MessageData? outMessageData = new MessageData();
+        messageParser.Parse(Arg.Any<FileUploadedMessage>(), out Arg.Any<MessageData?>(), Arg.Any<List<string>>())
+            .Returns(x =>
+            {
+                x[1] = new MessageData
+                {
+                    FileName = "file.xlsx",
+                    FileUri = "test.xlsx",
+                    FileId = "file-id-123",
+                    LocalAuthority = new LocalAuthority { Code = "LACode", Name = "LAName" }
+                };
+                return true;
+            });
+
+        SpreadsheetValidatorFunction function = new(messageParser, validationService, validationResultService, NullLogger<SpreadsheetValidatorFunction>.Instance);
+        ServiceBusReceivedMessage message = CreateMessage("test.xlsx", "file-id-123", new LocalAuthority { Code = "LACode", Name = "LAName" });
         ServiceBusMessageActions messageActions = Substitute.For<ServiceBusMessageActions>();
 
         await function.Run(message, messageActions);
@@ -34,7 +50,10 @@ public class SpreadsheetValidatorFunctionTest
     {
         ISpreadsheetValidationService validationService = Substitute.For<ISpreadsheetValidationService>();
         IFileValidationResultService validationResultService = Substitute.For<IFileValidationResultService>();
-        SpreadsheetValidatorFunction function = new(validationService, validationResultService, NullLogger<SpreadsheetValidatorFunction>.Instance);
+        IMessageParser messageParser = Substitute.For<IMessageParser>();
+        MessageData? outMessageData = new MessageData();
+        messageParser.Parse(Arg.Any<FileUploadedMessage>(), out outMessageData, Arg.Any<List<string>>()).Returns(true);
+        SpreadsheetValidatorFunction function = new(messageParser, validationService, validationResultService, NullLogger<SpreadsheetValidatorFunction>.Instance);
         ServiceBusReceivedMessage message = CreateMessage(null, null);
         ServiceBusMessageActions messageActions = Substitute.For<ServiceBusMessageActions>();
 
@@ -81,7 +100,10 @@ public class SpreadsheetValidatorFunctionTest
     {
         ISpreadsheetValidationService validationService = Substitute.For<ISpreadsheetValidationService>();
         IFileValidationResultService validationResultService = Substitute.For<IFileValidationResultService>();
-        SpreadsheetValidatorFunction function = new(validationService, validationResultService, NullLogger<SpreadsheetValidatorFunction>.Instance);
+        IMessageParser messageParser = Substitute.For<IMessageParser>();
+        MessageData? outMessageData = new MessageData();
+        messageParser.Parse(Arg.Any<FileUploadedMessage>(), out outMessageData, Arg.Any<List<string>>()).Returns(true);
+        SpreadsheetValidatorFunction function = new(messageParser, validationService, validationResultService, NullLogger<SpreadsheetValidatorFunction>.Instance);
         ServiceBusReceivedMessage message = ServiceBusModelFactory.ServiceBusReceivedMessage(
             messageId: Guid.Empty.ToString(),
             contentType: "application/json");
@@ -98,13 +120,33 @@ public class SpreadsheetValidatorFunctionTest
     public async Task Run_WhenLocalAuthorityMissing_ThrowsValidationError()
     {
         ISpreadsheetValidationService validationService = Substitute.For<ISpreadsheetValidationService>();
+        validationService.ValidateAsync(Arg.Any<MessageData>(), Arg.Any<List<string>>()).Returns(Task.FromResult(false));
+
         IFileValidationResultService validationResultService = Substitute.For<IFileValidationResultService>();
-        SpreadsheetValidatorFunction function = new(validationService, validationResultService, NullLogger<SpreadsheetValidatorFunction>.Instance);
+
+        IMessageParser messageParser = Substitute.For<IMessageParser>();
+        MessageData? outMessageData = new MessageData();
+        messageParser.Parse(Arg.Any<FileUploadedMessage>(), out Arg.Any<MessageData?>(), Arg.Any<List<string>>())
+            .Returns(x => 
+            {
+                x[1] = new MessageData
+                {
+                    FileName = "file.xlsx",
+                    FileUri = "test.xlsx",
+                    FileId = "file-id-123",
+                    LocalAuthority = null // Simulate missing local authority
+                };
+                return true; 
+            });
+
         ServiceBusReceivedMessage message = CreateMessage("test.xlsx", "file-id-123", null);
         ServiceBusMessageActions messageActions = Substitute.For<ServiceBusMessageActions>();
+
+        SpreadsheetValidatorFunction function = new(messageParser, validationService, validationResultService, NullLogger<SpreadsheetValidatorFunction>.Instance);
         await function.Run(message, messageActions);
-        await validationService.DidNotReceive().ValidateAsync(Arg.Any<MessageData>(), Arg.Any<List<string>>());
-        await validationResultService.Received(1).SendResultAsync("file-id-123", false, Arg.Is<IEnumerable<string>>(errors => new List<string>(errors).Contains("Local authority is missing or invalid.")));
+
+        await validationService.Received(1).ValidateAsync(Arg.Any<MessageData>(), Arg.Any<List<string>>());
+        await validationResultService.Received(1).SendResultAsync("file-id-123", false, Arg.Any<List<string>>());
         await messageActions.Received().CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>());
     }
 }

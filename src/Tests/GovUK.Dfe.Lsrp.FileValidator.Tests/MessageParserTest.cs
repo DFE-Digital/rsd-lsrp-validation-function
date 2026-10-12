@@ -1,10 +1,24 @@
 ﻿using GovUK.Dfe.Lsrp.FileValidator.Models;
+using Microsoft.Extensions.Configuration;
 using Xunit.Abstractions;
 
 namespace GovUK.Dfe.Lsrp.FileValidator.Tests;
 
-public class MessageParserTest(ITestOutputHelper output)
+public class MessageParserTest
 {
+    private readonly MessageParser messageParser;
+    private readonly ITestOutputHelper output;
+
+    public MessageParserTest(ITestOutputHelper output)
+    {
+        this.output = output;
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            { "LocalAuthorityMissingMessage", "Local authority is missing or invalid." }
+        }).Build();
+        messageParser = new MessageParser(configuration);
+    }
+
     [Fact]
     public void Parse_Valid_Message()
     {
@@ -34,7 +48,7 @@ public class MessageParserTest(ITestOutputHelper output)
 
         // Act
         List<string> errors = [];
-        bool result = MessageParser.Parse(message, out MessageData? messageData, errors);
+        bool result = messageParser.Parse(message, out MessageData? messageData, errors);
 
         // Assert
         Assert.True(result);
@@ -72,7 +86,7 @@ public class MessageParserTest(ITestOutputHelper output)
 
         // Act
         List<string> errors = [];
-        bool result = MessageParser.Parse(message, out MessageData? messageData, errors);
+        bool result = messageParser.Parse(message, out MessageData? messageData, errors);
 
         // Assert
         Assert.True(result);
@@ -110,7 +124,7 @@ public class MessageParserTest(ITestOutputHelper output)
 
         // Act
         List<string> errors = [];
-        bool result = MessageParser.Parse(message, out MessageData? messageData, errors);
+        bool result = messageParser.Parse(message, out MessageData? messageData, errors);
 
         // Assert
         Assert.True(result);
@@ -130,7 +144,7 @@ public class MessageParserTest(ITestOutputHelper output)
 
         // Act
         List<string> errors = [];
-        bool result = MessageParser.Parse(message, out MessageData? messageData, errors);
+        bool result = messageParser.Parse(message, out MessageData? messageData, errors);
 
         // Assert
         Assert.False(result);
@@ -149,7 +163,7 @@ public class MessageParserTest(ITestOutputHelper output)
 
         // Act
         List<string> errors = [];
-        bool result = MessageParser.Parse(message, out MessageData? messageData, errors);
+        bool result = messageParser.Parse(message, out MessageData? messageData, errors);
 
         // Assert
         Assert.False(result);
