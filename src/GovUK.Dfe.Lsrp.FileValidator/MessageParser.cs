@@ -34,7 +34,7 @@ namespace GovUK.Dfe.Lsrp.FileValidator
 
             if (!HasLocalAuthority(fileMessage.Message, out LocalAuthority? localAuthority))
             {
-                errors.Add(configuration["LocalAuthorityMissingMessage"] ?? " Local authority is missing or invalid.");
+                errors.Add(configuration["LocalAuthorityMissingMessage"] ?? "Local authority is missing or invalid.");
             }
 
             messageData.LocalAuthority = localAuthority;
