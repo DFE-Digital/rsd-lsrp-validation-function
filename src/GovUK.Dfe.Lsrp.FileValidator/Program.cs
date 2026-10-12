@@ -12,10 +12,16 @@ var builder = FunctionsApplication.CreateBuilder(args);
 
 builder.ConfigureFunctionsWebApplication();
 
-var validationSection = builder.Configuration.GetSection("ValidationOptions");
-builder.Services.Configure<ValidationOptions>(validationSection);
+builder.Configuration.AddJsonFile("validationoptions.json");
+builder.Configuration.AddJsonFile("errormessages.json");
 
-builder.Configuration.AddJsonFile("errormessages.json", optional: true, reloadOnChange: true);
+IConfigurationSection validationSection = builder.Configuration.GetSection("ValidationOptions");
+if (validationSection == null || !validationSection.Exists())
+{
+     throw new InvalidOperationException("ValidationOptions section missing in configuration.");
+}
+
+builder.Services.Configure<ValidationOptions>(validationSection);
 
 if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING")))
 {
