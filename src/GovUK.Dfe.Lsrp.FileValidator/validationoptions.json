@@ -40,7 +40,7 @@
         "Rules": [
           {
             "RuleName": "Rule1",
-            "Expression": "Utils.CheckYear(data.DataYear)",
+            "Expression": "!string.IsNullOrEmpty(data.DataYear) && Regex.IsMatch(data.DataYear, \"^20\\\\d{2}-\\\\d{2} Quarterly Data$\") && int.Parse(data.DataYear.Substring(5, 2)) + 2000 - int.Parse(data.DataYear.Substring(0, 4)) == 1",
             "ErrorMessage": "Date range in cell B5 in the Quarterly Return Template tab can only cover one year. The date range in the cell is too long or short. Action required: Edit the spreadsheet so the date in the cell follows the required format, like 2026-27 Quarterly Data."
           }
         ]
@@ -50,7 +50,7 @@
         "Rules": [
           {
             "RuleName": "Rule1",
-            "Expression": "Utils.CheckLocalAuthority(data.LocalAuthority, localAuthority)",
+            "Expression": "!string.IsNullOrEmpty(data.LocalAuthority) && string.Equals(data.LocalAuthority.Split(' ')[0], localAuthority.Code, StringComparison.OrdinalIgnoreCase)",
             "ErrorMessage": "Local authority codes must match. The codes you have given for the local authority you are submitting data for do not match. Action required: Check and correct the local authority you have selected in this service and named in cell B13 in the Cover page of the spreadsheet."
           }
         ]

@@ -35,7 +35,7 @@
       "Rules": [
         {
           "RuleName": "Rule1",
-          "Expression": "Utils.CheckYear(data.DataYear)",
+          "Expression": "!string.IsNullOrEmpty(data.DataYear) && Regex.IsMatch(data.DataYear, \"^20\\\\d{2}-\\\\d{2} Quarterly Data$\") && int.Parse(data.DataYear.Substring(5, 2)) + 2000 - int.Parse(data.DataYear.Substring(0, 4)) == 1",
           "ErrorMessage": "Data Year must be of format \"20xx-yy Quarterly Data\" and represent consecutive years"
         }
       ]
@@ -45,7 +45,7 @@
       "Rules": [
         {
           "RuleName": "Rule1",
-          "Expression": "Utils.CheckLocalAuthority(data.LocalAuthority, localAuthority)",
+          "Expression": "!string.IsNullOrEmpty(data.LocalAuthority) && string.Equals(data.LocalAuthority.Split(' ')[0], localAuthority.Code, StringComparison.OrdinalIgnoreCase)",
           "ErrorMessage": "Local Authority must match"
         }
       ]

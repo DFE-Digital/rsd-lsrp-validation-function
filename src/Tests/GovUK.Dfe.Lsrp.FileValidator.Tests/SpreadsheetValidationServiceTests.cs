@@ -173,9 +173,10 @@ public class SpreadsheetValidationServiceTests(ITestOutputHelper output)
         SpreadsheetValidationService service = new(filenameValidator, fileProvider, dataProvider, dataValidator, options);
         List<string> errors = new();
         MessageData messageData = new() { FileUri = "testuri", FileName = "test.xlsx", LocalAuthority = new LocalAuthority { Code = "LA1", Name = "Local-Authority-1" } };
+
         bool result = await service.ValidateAsync(messageData, errors);
 
-        output.WriteLine($"Validation result: {result}. Errors: {string.Join(", ", errors)}");
+        output.WriteLine($"Validation result: {result}. Data: {JsonSerializer.Serialize(messageData)}. Errors: {string.Join(", ", errors)}");
         Assert.True(result);
         Assert.Empty(errors);
     }
