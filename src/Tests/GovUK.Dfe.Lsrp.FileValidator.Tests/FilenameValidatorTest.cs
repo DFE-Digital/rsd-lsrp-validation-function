@@ -120,7 +120,6 @@ public class FilenameValidatorTest(ITestOutputHelper output)
                 ["FilenamePrefix"] = "lsrp-quarterly-return-September-2026-",
                 ["LocalAuthorityMismatchMessage"] = "LocalAuthorityMismatchMessage test",
                 ["FilenameFormatIncorrectMessage"] = "FilenameFormatIncorrectMessage test",
-                ["FilePrefixIncorrectMessage"] = "FilePrefixIncorrectMessage test",
                 ["FileExtensionIncorrectMessage"] = "FileExtensionIncorrectMessage test",
             })
             .Build();

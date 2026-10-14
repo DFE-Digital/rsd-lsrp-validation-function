@@ -3,7 +3,7 @@
     "SpreadsheetMaps": [
       {
         "Worksheet": "Quarterly Return Template",
-        "ErrorMessage": "Spreadsheet must contain the Quarterly Return Template tab. The Quarterly Return Template tab is missing from your file or has been renamed. Action required: Open your spreadsheet and make sure the Quarterly Return Template tab is present. It must follow the naming format exactly with no spelling mistakes or additional spaces.",
+        "ErrorMessage": "The file must contain worksheets named 'Cover' and 'Quarterly Return Template'. There must not be any leading or trailing spaces in those names. Remove the file, rename the sheets and upload it again.",
         "DataMaps": [
           {
             "Name": "DataYear",
@@ -14,18 +14,18 @@
           {
             "ColumnName": "A",
             "HasData": false,
-            "ErrorMessage": "Column A in the Quarterly Return Template tab must be empty. There is at least one letter or number in at least one box in column A. Action required: Clear all data from column A, save the file then submit it again."
+            "ErrorMessage": "Column A in the Quarterly Return Template worksheet must be empty. There is at least one letter or number in at least one box in column A. Remove the file, delete the data in the column and upload it again."
           },
           {
             "ColumnName": "B",
             "HasData": true,
-            "ErrorMessage": "Column B in the the Quarterly Return Template tab cannot be empty. There is no data in any of the boxes in column B. Action required: Make sure the row names in the file match those that are in the template, save the file then submit it again."
+            "ErrorMessage": "Column B in the the Quarterly Return Template worksheet cannot be empty. Remove the file, delete the data in the column and upload it again."
           }
         ]
       },
       {
         "Worksheet": "Cover",
-        "ErrorMessage": "Spreadsheet must contain the Cover tab. The Cover tab is missing from your file or has been renamed. Action required: Open your spreadsheet and make sure the Cover tab is present. It must follow the naming format exactly with no spelling mistakes or additional spaces.",
+        "ErrorMessage": "The file must contain worksheets named 'Cover' and 'Quarterly Return Template'. There must not be any leading or trailing spaces in those names. Remove the file, rename the sheets and upload it again.",
         "DataMaps": [
           {
             "Name": "LocalAuthority",
@@ -41,7 +41,7 @@
           {
             "RuleName": "Rule1",
             "Expression": "!string.IsNullOrEmpty(data.DataYear) && Regex.IsMatch(data.DataYear, \"^20\\\\d{2}-\\\\d{2} Quarterly Data$\") && int.Parse(data.DataYear.Substring(5, 2)) + 2000 - int.Parse(data.DataYear.Substring(0, 4)) == 1",
-            "ErrorMessage": "Date range in cell B5 in the Quarterly Return Template tab can only cover one year. The date range in the cell is too long or short. Action required: Edit the spreadsheet so the date in the cell follows the required format, like 2026-27 Quarterly Data."
+            "ErrorMessage": "Cell B5 in the Quarterly Return Template worksheet is incorrect. The years must be consecutive, for example: 2026-27 Quarterly Data. Remove the file, correct the dates and upload it again."
           }
         ]
       },
@@ -51,7 +51,7 @@
           {
             "RuleName": "Rule1",
             "Expression": "!string.IsNullOrEmpty(data.LocalAuthority) && string.Equals(data.LocalAuthority.Split(' ')[0], localAuthority.Code, StringComparison.OrdinalIgnoreCase)",
-            "ErrorMessage": "Local authority codes must match. The codes you have given for the local authority you are submitting data for do not match. Action required: Check and correct the local authority you have selected in this service and named in cell B13 in the Cover page of the spreadsheet."
+            "ErrorMessage": "The local authority code selected in the service does not match the one selected in cell B13 on the Cover worksheet. If you selected the wrong local authority in the service, then change that. If you selected the wrong local authority on the Cover worksheet, then change that. In either case, please remove the file and upload again."
           }
         ]
       }

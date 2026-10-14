@@ -19,7 +19,7 @@ public class FilenameValidator(IConfiguration configuration, ILogger<FilenameVal
         if (!filename.StartsWith(expectedPrefix, StringComparison.OrdinalIgnoreCase))
         {
             logger.LogWarning("Filename does not start with the expected prefix '{expectedPrefix}'.", expectedPrefix);
-            AddError(errors, "FilePrefixIncorrectMessage");
+            AddError(errors, "FilenameFormatIncorrectMessage");
             return false;
         }
 
