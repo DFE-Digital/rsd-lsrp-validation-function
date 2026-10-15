@@ -2,5 +2,5 @@
   "LocalAuthorityMissingMessage": "Please first select a local authority in the service, then remove the file and upload again.",
   "LocalAuthorityMismatchMessage": "The local authority code in the file name does not match the one selected in this service. Select the correct authority in this service, or remove the file and rename it correctly, then upload it again.",
   "FileExtensionIncorrectMessage": "The return must be a XLSX file. Remove the file, save it as an XLSX file then upload it again.",
-  "FilenameFormatIncorrectMessage": "The file name must begin with 'lsrp-quarterly-return-' and then include the month, year, 3 digit LA code and the LA name. For example, lsrp-quarterly-return-September-2026-999-countyshire.xlsx. Remove this file, rename it and upload it again."
+  "FilenameFormatIncorrectMessage": "The file name must begin with lsrp-quarterly-return- and then include the month, year, 3 digit LA code and the LA name. For example, lsrp-quarterly-return-September-2026-999-countyshire.xlsx. Remove this file, rename it and upload it again."
 }
