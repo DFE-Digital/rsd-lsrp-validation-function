@@ -5,10 +5,11 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using System.Text.Json;
+using Xunit.Abstractions;
 
 namespace GovUK.Dfe.Lsrp.FileValidator.Tests;
 
-public class SpreadsheetValidatorFunctionTest
+public class SpreadsheetValidatorFunctionTest(ITestOutputHelper testOutput)
 {
     [Fact]
     public async Task Run_WhenMessageIsValid_CallsValidationAndCompletesMessage()
@@ -34,7 +35,8 @@ public class SpreadsheetValidatorFunctionTest
                 return true;
             });
 
-        SpreadsheetValidatorFunction function = new(messageParser, validationService, validationResultService, NullLogger<SpreadsheetValidatorFunction>.Instance);
+        TestLogger<SpreadsheetValidatorFunction> logger = new(testOutput);
+        SpreadsheetValidatorFunction function = new(messageParser, validationService, validationResultService, logger);
         ServiceBusReceivedMessage message = CreateMessage("test.xlsx", "file-id-123", new LocalAuthority { Code = "LACode", Name = "LAName" });
         ServiceBusMessageActions messageActions = Substitute.For<ServiceBusMessageActions>();
 
