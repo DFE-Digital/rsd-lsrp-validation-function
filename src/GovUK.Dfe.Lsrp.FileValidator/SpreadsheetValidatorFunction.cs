@@ -1,8 +1,11 @@
 using Azure.Messaging.ServiceBus;
+using DocumentFormat.OpenXml.Spreadsheet;
 using GovUK.Dfe.Lsrp.FileValidator.Models;
 using GovUK.Dfe.Lsrp.FileValidator.Services;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
+using System.Reflection;
 using System.Text.Json;
 
 namespace GovUK.Dfe.Lsrp.FileValidator;
@@ -18,7 +21,7 @@ public class SpreadsheetValidatorFunction(
     [Function(nameof(SpreadsheetValidatorFunction))]
     public async Task Run([ServiceBusTrigger("%Topic%", "%Subscription%")] ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions)
     {
-        logger.LogInformation("Message ID: {id}. Body Length: {length}. Content-Type: {contentType}", message.MessageId, message.Body.ToMemory().Length, message.ContentType);
+        logger.LogInformation("Function version: {funcVer}. Message ID: {id}. Body length: {length}. Content type: {contentType}.", GetVersion(), message.MessageId, message.Body.ToMemory().Length, message.ContentType);
 
         FileUploadedMessage? fileMessage = JsonSerializer.Deserialize<FileUploadedMessage>(message.Body.ToString(), jsonOptions) ?? throw new ArgumentException("Message body is empty or not valid JSON.");
 
@@ -41,5 +44,12 @@ public class SpreadsheetValidatorFunction(
         await validationResultService.SendResultAsync(messageData.FileId, isValid, errors);
 
         await messageActions.CompleteMessageAsync(message);
+    }
+
+    private static string? GetVersion()
+    {
+        Assembly assembly = Assembly.GetExecutingAssembly();
+        FileVersionInfo info = FileVersionInfo.GetVersionInfo(assembly.Location);
+        return info.ProductVersion;
     }
 }
