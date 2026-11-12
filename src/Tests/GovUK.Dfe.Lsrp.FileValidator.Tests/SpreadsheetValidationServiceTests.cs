@@ -1,5 +1,6 @@
 using GovUK.Dfe.Lsrp.FileValidator.Models;
 using GovUK.Dfe.Lsrp.FileValidator.Services;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using RulesEngine.Models;
@@ -162,7 +163,7 @@ public class SpreadsheetValidationServiceTests(ITestOutputHelper output)
         fileProvider.GetFileAsync("testuri").Returns(_ => new MemoryStream(File.ReadAllBytes(excelPath)));
         ISpreadsheetDataProvider dataProvider = new SpreadsheetDataProvider();
 
-        IDataValidator dataValidator = new DataValidator();
+        IDataValidator dataValidator = new DataValidator(NullLogger<DataValidator>.Instance);
 
         ValidationOptions validationOptions = JsonSerializer.Deserialize<ValidationOptions>(File.ReadAllText("validation-options.json")) ?? throw new InvalidOperationException("ValidationOptions missing in validation-options.json");
         IOptions<ValidationOptions> options = Substitute.For<IOptions<ValidationOptions>>();
@@ -190,7 +191,8 @@ public class SpreadsheetValidationServiceTests(ITestOutputHelper output)
         fileProvider.GetFileAsync("testuri").Returns(_ => new MemoryStream(File.ReadAllBytes(excelPath)));
         ISpreadsheetDataProvider dataProvider = new SpreadsheetDataProvider();
 
-        IDataValidator dataValidator = new DataValidator();
+        TestLogger<DataValidator> logger = new(output);
+        IDataValidator dataValidator = new DataValidator(logger);
 
         ValidationOptions validationOptions = JsonSerializer.Deserialize<ValidationOptions>(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "validation-options.json"))) ?? throw new InvalidOperationException("ValidationOptions missing in validation-options.json");
         IOptions<ValidationOptions> options = Substitute.For<IOptions<ValidationOptions>>();
