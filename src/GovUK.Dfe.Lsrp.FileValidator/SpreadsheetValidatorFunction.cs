@@ -1,5 +1,4 @@
 using Azure.Messaging.ServiceBus;
-using DocumentFormat.OpenXml.Spreadsheet;
 using GovUK.Dfe.Lsrp.FileValidator.Models;
 using GovUK.Dfe.Lsrp.FileValidator.Services;
 using Microsoft.Azure.Functions.Worker;
@@ -34,11 +33,11 @@ public class SpreadsheetValidatorFunction(
 
         bool isValid = errors.Count == 0 && await validationService.ValidateAsync(messageData!, errors);
 
-        logger.LogInformation("Spreadsheet validation {result} for message ID {messageId}. {errors}", isValid ? "succeeded" : "failed", messageData?.MessageId, string.Join(", ", errors));
+        logger.LogInformation("Spreadsheet validation {result} for message ID {messageId}. {errors}", isValid ? "succeeded" : "failed", messageData?.MessageId, string.Join("| ", errors));
 
         if (string.IsNullOrEmpty(messageData?.FileId))
         {
-            throw new InvalidDataException($"Message has no FileId: {string.Join(", ", errors)}");
+            throw new InvalidDataException($"Message has no FileId: {string.Join("| ", errors)}");
         }
 
         await validationResultService.SendResultAsync(messageData.FileId, isValid, errors);

@@ -1,13 +1,13 @@
 ﻿using GovUK.Dfe.Lsrp.FileValidator.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using System.Net;
 using System.Net.Http.Json;
 
 namespace GovUK.Dfe.Lsrp.FileValidator.Services;
 
 public class FileValidationResultService : IFileValidationResultService
 {
+    private const string MarkdownNewline = "\r";
     private readonly string TenantId;
     private readonly string FilesUrl;
     private readonly string ApiKey;
@@ -49,7 +49,7 @@ public class FileValidationResultService : IFileValidationResultService
         FileValidationResultDto dto = new()
         {
             IsValid = isValid,
-            Message = string.Join(", ", errors),
+            Message = string.Join(MarkdownNewline, errors),
             Source = fileId
         };
 
