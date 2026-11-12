@@ -3,7 +3,7 @@
     "SpreadsheetMaps": [
       {
         "Worksheet": "Quarterly Return Template",
-        "ErrorMessage": "**The file must contain a worksheet (tab) named Cover.** There must not be any leading or trailing spaces in those names. Remove the file, rename the sheets and upload it again.",
+        "ErrorMessage": "**The file must contain a worksheet (tab) named Quarterly Return Template.** There must not be any leading or trailing spaces in that name. Remove the file, rename the sheet and upload it again.",
         "DataMaps": [
           {
             "Name": "DataYear",
